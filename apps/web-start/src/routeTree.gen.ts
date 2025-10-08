@@ -9,38 +9,176 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CourseCourseIDRouteImport } from './routes/course/$courseID'
+import { Route as AssignmentAssignmentIDRouteImport } from './routes/assignment/$assignmentID'
+import { Route as UidProfileRouteImport } from './routes/$uid/profile'
+import { Route as CourseCourseIDSyllabusRouteImport } from './routes/course/$courseID/syllabus'
+import { Route as CourseCourseIDMediaRouteImport } from './routes/course/$courseID/media'
+import { Route as CourseCourseIDGradesRouteImport } from './routes/course/$courseID/grades'
+import { Route as CourseCourseIDAssignmentsRouteImport } from './routes/course/$courseID/assignments'
+import { Route as UidProfileSettingsRouteImport } from './routes/$uid/profile/settings'
+import { Route as AssignmentCourseCourseIDAssignmentsRouteImport } from './routes/assignment/course/$courseID/assignments'
 
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CourseCourseIDRoute = CourseCourseIDRouteImport.update({
+  id: '/course/$courseID',
+  path: '/course/$courseID',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssignmentAssignmentIDRoute = AssignmentAssignmentIDRouteImport.update({
+  id: '/assignment/$assignmentID',
+  path: '/assignment/$assignmentID',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UidProfileRoute = UidProfileRouteImport.update({
+  id: '/$uid/profile',
+  path: '/$uid/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CourseCourseIDSyllabusRoute = CourseCourseIDSyllabusRouteImport.update({
+  id: '/syllabus',
+  path: '/syllabus',
+  getParentRoute: () => CourseCourseIDRoute,
+} as any)
+const CourseCourseIDMediaRoute = CourseCourseIDMediaRouteImport.update({
+  id: '/media',
+  path: '/media',
+  getParentRoute: () => CourseCourseIDRoute,
+} as any)
+const CourseCourseIDGradesRoute = CourseCourseIDGradesRouteImport.update({
+  id: '/grades',
+  path: '/grades',
+  getParentRoute: () => CourseCourseIDRoute,
+} as any)
+const CourseCourseIDAssignmentsRoute =
+  CourseCourseIDAssignmentsRouteImport.update({
+    id: '/assignments',
+    path: '/assignments',
+    getParentRoute: () => CourseCourseIDRoute,
+  } as any)
+const UidProfileSettingsRoute = UidProfileSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => UidProfileRoute,
+} as any)
+const AssignmentCourseCourseIDAssignmentsRoute =
+  AssignmentCourseCourseIDAssignmentsRouteImport.update({
+    id: '/assignment/course/$courseID/assignments',
+    path: '/assignment/course/$courseID/assignments',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/$uid/profile': typeof UidProfileRouteWithChildren
+  '/assignment/$assignmentID': typeof AssignmentAssignmentIDRoute
+  '/course/$courseID': typeof CourseCourseIDRouteWithChildren
+  '/$uid/profile/settings': typeof UidProfileSettingsRoute
+  '/course/$courseID/assignments': typeof CourseCourseIDAssignmentsRoute
+  '/course/$courseID/grades': typeof CourseCourseIDGradesRoute
+  '/course/$courseID/media': typeof CourseCourseIDMediaRoute
+  '/course/$courseID/syllabus': typeof CourseCourseIDSyllabusRoute
+  '/assignment/course/$courseID/assignments': typeof AssignmentCourseCourseIDAssignmentsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/$uid/profile': typeof UidProfileRouteWithChildren
+  '/assignment/$assignmentID': typeof AssignmentAssignmentIDRoute
+  '/course/$courseID': typeof CourseCourseIDRouteWithChildren
+  '/$uid/profile/settings': typeof UidProfileSettingsRoute
+  '/course/$courseID/assignments': typeof CourseCourseIDAssignmentsRoute
+  '/course/$courseID/grades': typeof CourseCourseIDGradesRoute
+  '/course/$courseID/media': typeof CourseCourseIDMediaRoute
+  '/course/$courseID/syllabus': typeof CourseCourseIDSyllabusRoute
+  '/assignment/course/$courseID/assignments': typeof AssignmentCourseCourseIDAssignmentsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/$uid/profile': typeof UidProfileRouteWithChildren
+  '/assignment/$assignmentID': typeof AssignmentAssignmentIDRoute
+  '/course/$courseID': typeof CourseCourseIDRouteWithChildren
+  '/$uid/profile/settings': typeof UidProfileSettingsRoute
+  '/course/$courseID/assignments': typeof CourseCourseIDAssignmentsRoute
+  '/course/$courseID/grades': typeof CourseCourseIDGradesRoute
+  '/course/$courseID/media': typeof CourseCourseIDMediaRoute
+  '/course/$courseID/syllabus': typeof CourseCourseIDSyllabusRoute
+  '/assignment/course/$courseID/assignments': typeof AssignmentCourseCourseIDAssignmentsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/$uid/profile'
+    | '/assignment/$assignmentID'
+    | '/course/$courseID'
+    | '/$uid/profile/settings'
+    | '/course/$courseID/assignments'
+    | '/course/$courseID/grades'
+    | '/course/$courseID/media'
+    | '/course/$courseID/syllabus'
+    | '/assignment/course/$courseID/assignments'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/$uid/profile'
+    | '/assignment/$assignmentID'
+    | '/course/$courseID'
+    | '/$uid/profile/settings'
+    | '/course/$courseID/assignments'
+    | '/course/$courseID/grades'
+    | '/course/$courseID/media'
+    | '/course/$courseID/syllabus'
+    | '/assignment/course/$courseID/assignments'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/$uid/profile'
+    | '/assignment/$assignmentID'
+    | '/course/$courseID'
+    | '/$uid/profile/settings'
+    | '/course/$courseID/assignments'
+    | '/course/$courseID/grades'
+    | '/course/$courseID/media'
+    | '/course/$courseID/syllabus'
+    | '/assignment/course/$courseID/assignments'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
+  UidProfileRoute: typeof UidProfileRouteWithChildren
+  AssignmentAssignmentIDRoute: typeof AssignmentAssignmentIDRoute
+  CourseCourseIDRoute: typeof CourseCourseIDRouteWithChildren
+  AssignmentCourseCourseIDAssignmentsRoute: typeof AssignmentCourseCourseIDAssignmentsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +186,110 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/course/$courseID': {
+      id: '/course/$courseID'
+      path: '/course/$courseID'
+      fullPath: '/course/$courseID'
+      preLoaderRoute: typeof CourseCourseIDRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assignment/$assignmentID': {
+      id: '/assignment/$assignmentID'
+      path: '/assignment/$assignmentID'
+      fullPath: '/assignment/$assignmentID'
+      preLoaderRoute: typeof AssignmentAssignmentIDRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$uid/profile': {
+      id: '/$uid/profile'
+      path: '/$uid/profile'
+      fullPath: '/$uid/profile'
+      preLoaderRoute: typeof UidProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/course/$courseID/syllabus': {
+      id: '/course/$courseID/syllabus'
+      path: '/syllabus'
+      fullPath: '/course/$courseID/syllabus'
+      preLoaderRoute: typeof CourseCourseIDSyllabusRouteImport
+      parentRoute: typeof CourseCourseIDRoute
+    }
+    '/course/$courseID/media': {
+      id: '/course/$courseID/media'
+      path: '/media'
+      fullPath: '/course/$courseID/media'
+      preLoaderRoute: typeof CourseCourseIDMediaRouteImport
+      parentRoute: typeof CourseCourseIDRoute
+    }
+    '/course/$courseID/grades': {
+      id: '/course/$courseID/grades'
+      path: '/grades'
+      fullPath: '/course/$courseID/grades'
+      preLoaderRoute: typeof CourseCourseIDGradesRouteImport
+      parentRoute: typeof CourseCourseIDRoute
+    }
+    '/course/$courseID/assignments': {
+      id: '/course/$courseID/assignments'
+      path: '/assignments'
+      fullPath: '/course/$courseID/assignments'
+      preLoaderRoute: typeof CourseCourseIDAssignmentsRouteImport
+      parentRoute: typeof CourseCourseIDRoute
+    }
+    '/$uid/profile/settings': {
+      id: '/$uid/profile/settings'
+      path: '/settings'
+      fullPath: '/$uid/profile/settings'
+      preLoaderRoute: typeof UidProfileSettingsRouteImport
+      parentRoute: typeof UidProfileRoute
+    }
+    '/assignment/course/$courseID/assignments': {
+      id: '/assignment/course/$courseID/assignments'
+      path: '/assignment/course/$courseID/assignments'
+      fullPath: '/assignment/course/$courseID/assignments'
+      preLoaderRoute: typeof AssignmentCourseCourseIDAssignmentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface UidProfileRouteChildren {
+  UidProfileSettingsRoute: typeof UidProfileSettingsRoute
+}
+
+const UidProfileRouteChildren: UidProfileRouteChildren = {
+  UidProfileSettingsRoute: UidProfileSettingsRoute,
+}
+
+const UidProfileRouteWithChildren = UidProfileRoute._addFileChildren(
+  UidProfileRouteChildren,
+)
+
+interface CourseCourseIDRouteChildren {
+  CourseCourseIDAssignmentsRoute: typeof CourseCourseIDAssignmentsRoute
+  CourseCourseIDGradesRoute: typeof CourseCourseIDGradesRoute
+  CourseCourseIDMediaRoute: typeof CourseCourseIDMediaRoute
+  CourseCourseIDSyllabusRoute: typeof CourseCourseIDSyllabusRoute
+}
+
+const CourseCourseIDRouteChildren: CourseCourseIDRouteChildren = {
+  CourseCourseIDAssignmentsRoute: CourseCourseIDAssignmentsRoute,
+  CourseCourseIDGradesRoute: CourseCourseIDGradesRoute,
+  CourseCourseIDMediaRoute: CourseCourseIDMediaRoute,
+  CourseCourseIDSyllabusRoute: CourseCourseIDSyllabusRoute,
+}
+
+const CourseCourseIDRouteWithChildren = CourseCourseIDRoute._addFileChildren(
+  CourseCourseIDRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
+  UidProfileRoute: UidProfileRouteWithChildren,
+  AssignmentAssignmentIDRoute: AssignmentAssignmentIDRoute,
+  CourseCourseIDRoute: CourseCourseIDRouteWithChildren,
+  AssignmentCourseCourseIDAssignmentsRoute:
+    AssignmentCourseCourseIDAssignmentsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
