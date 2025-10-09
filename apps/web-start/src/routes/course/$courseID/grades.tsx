@@ -23,8 +23,8 @@ function RouteComponent() {
         </div>
       </div>
       {/* Table */}
-      <div className="mx-10 rounded-md border border-slate-300">
-        <table className="w-full text-left text-gray-700">
+      <div className="mx-20 rounded-md border border-slate-300">
+        <table className="w-full text-left text-gray-700 h-screen">
           <thead className="bg-gray-100 text-gray-500 text-sm uppercase tracking-wide">
             <tr>
               <th className="px-6 py-4 font-medium">#</th>
