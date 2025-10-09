@@ -54,7 +54,7 @@ function RouteComponent() {
           <div className="flex">
             <div className="w-full overflow-y-scroll">
               <h2 className="text-2xl font-semibold my-5 mx-5">
-                Recent Assignment Feedback
+                Recent Feedback
               </h2>
               <div className="space-y-5 mx-3 my-4 h-60 overflow-y-auto">
                 You currently have no recent feedback
