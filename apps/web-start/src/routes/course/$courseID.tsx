@@ -1,9 +1,13 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { Outlet, createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/course/$courseID')({
-  component: RouteComponent,
-})
+  component: CourseLayout,
+});
 
-function RouteComponent() {
-  return <div>Hello "/course/$courseID"!</div>
+function CourseLayout() {
+  return (
+    <div className="min-h-screen bg-slate-100">
+      <Outlet />
+    </div>
+  );
 }

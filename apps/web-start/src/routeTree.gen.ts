@@ -14,7 +14,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CourseCourseIDRouteImport } from './routes/course/$courseID'
 import { Route as AssignmentAssignmentIDRouteImport } from './routes/assignment/$assignmentID'
 import { Route as UidProfileRouteImport } from './routes/$uid/profile'
+import { Route as CourseCourseIDIndexRouteImport } from './routes/course/$courseID/index'
 import { Route as CourseCourseIDSyllabusRouteImport } from './routes/course/$courseID/syllabus'
+import { Route as CourseCourseIDPeopleRouteImport } from './routes/course/$courseID/people'
 import { Route as CourseCourseIDMediaRouteImport } from './routes/course/$courseID/media'
 import { Route as CourseCourseIDGradesRouteImport } from './routes/course/$courseID/grades'
 import { Route as CourseCourseIDAssignmentsRouteImport } from './routes/course/$courseID/assignments'
@@ -46,9 +48,19 @@ const UidProfileRoute = UidProfileRouteImport.update({
   path: '/$uid/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CourseCourseIDIndexRoute = CourseCourseIDIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CourseCourseIDRoute,
+} as any)
 const CourseCourseIDSyllabusRoute = CourseCourseIDSyllabusRouteImport.update({
   id: '/syllabus',
   path: '/syllabus',
+  getParentRoute: () => CourseCourseIDRoute,
+} as any)
+const CourseCourseIDPeopleRoute = CourseCourseIDPeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
   getParentRoute: () => CourseCourseIDRoute,
 } as any)
 const CourseCourseIDMediaRoute = CourseCourseIDMediaRouteImport.update({
@@ -89,7 +101,9 @@ export interface FileRoutesByFullPath {
   '/course/$courseID/assignments': typeof CourseCourseIDAssignmentsRoute
   '/course/$courseID/grades': typeof CourseCourseIDGradesRoute
   '/course/$courseID/media': typeof CourseCourseIDMediaRoute
+  '/course/$courseID/people': typeof CourseCourseIDPeopleRoute
   '/course/$courseID/syllabus': typeof CourseCourseIDSyllabusRoute
+  '/course/$courseID/': typeof CourseCourseIDIndexRoute
   '/assignment/course/$courseID/assignments': typeof AssignmentCourseCourseIDAssignmentsRoute
 }
 export interface FileRoutesByTo {
@@ -97,12 +111,13 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/$uid/profile': typeof UidProfileRouteWithChildren
   '/assignment/$assignmentID': typeof AssignmentAssignmentIDRoute
-  '/course/$courseID': typeof CourseCourseIDRouteWithChildren
   '/$uid/profile/settings': typeof UidProfileSettingsRoute
   '/course/$courseID/assignments': typeof CourseCourseIDAssignmentsRoute
   '/course/$courseID/grades': typeof CourseCourseIDGradesRoute
   '/course/$courseID/media': typeof CourseCourseIDMediaRoute
+  '/course/$courseID/people': typeof CourseCourseIDPeopleRoute
   '/course/$courseID/syllabus': typeof CourseCourseIDSyllabusRoute
+  '/course/$courseID': typeof CourseCourseIDIndexRoute
   '/assignment/course/$courseID/assignments': typeof AssignmentCourseCourseIDAssignmentsRoute
 }
 export interface FileRoutesById {
@@ -116,7 +131,9 @@ export interface FileRoutesById {
   '/course/$courseID/assignments': typeof CourseCourseIDAssignmentsRoute
   '/course/$courseID/grades': typeof CourseCourseIDGradesRoute
   '/course/$courseID/media': typeof CourseCourseIDMediaRoute
+  '/course/$courseID/people': typeof CourseCourseIDPeopleRoute
   '/course/$courseID/syllabus': typeof CourseCourseIDSyllabusRoute
+  '/course/$courseID/': typeof CourseCourseIDIndexRoute
   '/assignment/course/$courseID/assignments': typeof AssignmentCourseCourseIDAssignmentsRoute
 }
 export interface FileRouteTypes {
@@ -131,7 +148,9 @@ export interface FileRouteTypes {
     | '/course/$courseID/assignments'
     | '/course/$courseID/grades'
     | '/course/$courseID/media'
+    | '/course/$courseID/people'
     | '/course/$courseID/syllabus'
+    | '/course/$courseID/'
     | '/assignment/course/$courseID/assignments'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -139,12 +158,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/$uid/profile'
     | '/assignment/$assignmentID'
-    | '/course/$courseID'
     | '/$uid/profile/settings'
     | '/course/$courseID/assignments'
     | '/course/$courseID/grades'
     | '/course/$courseID/media'
+    | '/course/$courseID/people'
     | '/course/$courseID/syllabus'
+    | '/course/$courseID'
     | '/assignment/course/$courseID/assignments'
   id:
     | '__root__'
@@ -157,7 +177,9 @@ export interface FileRouteTypes {
     | '/course/$courseID/assignments'
     | '/course/$courseID/grades'
     | '/course/$courseID/media'
+    | '/course/$courseID/people'
     | '/course/$courseID/syllabus'
+    | '/course/$courseID/'
     | '/assignment/course/$courseID/assignments'
   fileRoutesById: FileRoutesById
 }
@@ -207,11 +229,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UidProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/course/$courseID/': {
+      id: '/course/$courseID/'
+      path: '/'
+      fullPath: '/course/$courseID/'
+      preLoaderRoute: typeof CourseCourseIDIndexRouteImport
+      parentRoute: typeof CourseCourseIDRoute
+    }
     '/course/$courseID/syllabus': {
       id: '/course/$courseID/syllabus'
       path: '/syllabus'
       fullPath: '/course/$courseID/syllabus'
       preLoaderRoute: typeof CourseCourseIDSyllabusRouteImport
+      parentRoute: typeof CourseCourseIDRoute
+    }
+    '/course/$courseID/people': {
+      id: '/course/$courseID/people'
+      path: '/people'
+      fullPath: '/course/$courseID/people'
+      preLoaderRoute: typeof CourseCourseIDPeopleRouteImport
       parentRoute: typeof CourseCourseIDRoute
     }
     '/course/$courseID/media': {
@@ -268,14 +304,18 @@ interface CourseCourseIDRouteChildren {
   CourseCourseIDAssignmentsRoute: typeof CourseCourseIDAssignmentsRoute
   CourseCourseIDGradesRoute: typeof CourseCourseIDGradesRoute
   CourseCourseIDMediaRoute: typeof CourseCourseIDMediaRoute
+  CourseCourseIDPeopleRoute: typeof CourseCourseIDPeopleRoute
   CourseCourseIDSyllabusRoute: typeof CourseCourseIDSyllabusRoute
+  CourseCourseIDIndexRoute: typeof CourseCourseIDIndexRoute
 }
 
 const CourseCourseIDRouteChildren: CourseCourseIDRouteChildren = {
   CourseCourseIDAssignmentsRoute: CourseCourseIDAssignmentsRoute,
   CourseCourseIDGradesRoute: CourseCourseIDGradesRoute,
   CourseCourseIDMediaRoute: CourseCourseIDMediaRoute,
+  CourseCourseIDPeopleRoute: CourseCourseIDPeopleRoute,
   CourseCourseIDSyllabusRoute: CourseCourseIDSyllabusRoute,
+  CourseCourseIDIndexRoute: CourseCourseIDIndexRoute,
 }
 
 const CourseCourseIDRouteWithChildren = CourseCourseIDRoute._addFileChildren(
