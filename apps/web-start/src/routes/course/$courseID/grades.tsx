@@ -25,7 +25,7 @@ function RouteComponent() {
       </div>
       <div className="mx-20 rounded-md border border-slate-300">
         <table className="w-full text-left text-gray-700 h-screen">
-          <thead className="bg-gray-100 text-gray-500 text-sm uppercase tracking-wide">
+          <thead className="bg-slate-200 text-gray-500 text-sm uppercase tracking-wide">
             <tr>
               <th className="px-6 py-4 font-medium">#</th>
               <th className="px-6 py-4 font-medium">Assignment</th>
@@ -75,7 +75,7 @@ function RouteComponent() {
             ].map((item) => (
               <tr
                 key={item.id}
-                className="hover:bg-gray-50 transition-colors text-base hover:cursor-pointer"
+                className="hover:bg-gray-50 bg-neutral-100 transition-colors text-base hover:cursor-pointer"
               >
                 <td className="px-6 py-4 text-gray-500">{item.id}</td>
                 <td className="px-6 py-4">
