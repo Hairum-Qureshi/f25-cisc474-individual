@@ -1,4 +1,11 @@
+import { Link } from '@tanstack/react-router';
+import { useState } from 'react';
+import { IoSunny } from 'react-icons/io5';
+import { FaMoon } from 'react-icons/fa';
+
 export default function Navbar() {
+  const [lightMode, setLightMode] = useState(true);
+
   return (
     <nav className="w-full bg-slate-200 p-4 h-20">
       <div className="flex items-center">
@@ -14,6 +21,15 @@ export default function Navbar() {
           <h3 className="font-semibold ml-3 text-slate-600 text-sm">
             UID: 123451251
           </h3>
+        </div>
+        <div className="ml-auto flex items-center">
+          <Link to="/dashboard">Dashboard</Link>
+          <div
+            className="mx-4 bg-slate-700 text-yellow-300 w-10 h-10 flex items-center justify-center rounded-full hover:cursor-pointer"
+            onClick={() => setLightMode(!lightMode)}
+          >
+            {lightMode ? <IoSunny className="text-2xl" /> : <FaMoon />}
+          </div>
         </div>
       </div>
     </nav>
