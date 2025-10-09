@@ -1,10 +1,17 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useRouterState } from '@tanstack/react-router';
 import { useState } from 'react';
 import { IoSunny } from 'react-icons/io5';
 import { FaMoon } from 'react-icons/fa';
 
 export default function Navbar() {
   const [lightMode, setLightMode] = useState(true);
+
+  const userID = '123';
+
+  const routerState = useRouterState();
+
+  const currentMatch = routerState.matches.at(-1); // last match in the stack
+  const params = currentMatch?.params;
 
   return (
     <nav className="w-full bg-slate-200 p-4 h-20">
@@ -22,8 +29,52 @@ export default function Navbar() {
             UID: 123451251
           </h3>
         </div>
-        <div className="ml-auto flex items-center">
-          <Link to="/dashboard">Dashboard</Link>
+        <div className="ml-auto flex items-center space-x-5">
+          <Link to="/dashboard" className="font-semibold text-sky-700">
+            Dashboard
+          </Link>
+          <Link to="/$uid/profile" params={{ uid: userID }}>
+            Profile
+          </Link>
+          {params && 'courseID' in params && (
+            <>
+              <Link
+                to="/course/$courseID/syllabus"
+                params={{ courseID: params.courseID }}
+                className="font-semibold text-sky-700"
+              >
+                Syllabus
+              </Link>
+              <Link
+                to="/course/$courseID/media"
+                params={{ courseID: params.courseID }}
+                className="font-semibold text-sky-700"
+              >
+                Media & Files
+              </Link>
+              <Link
+                to="/course/$courseID/assignments"
+                params={{ courseID: params.courseID }}
+                className="font-semibold text-sky-700"
+              >
+                Assignments
+              </Link>
+              <Link
+                to="/course/$courseID/grades"
+                params={{ courseID: params.courseID }}
+                className="font-semibold text-sky-700"
+              >
+                Grades
+              </Link>
+              <Link
+                to="/course/$courseID/people"
+                params={{ courseID: params.courseID }}
+                className="font-semibold text-sky-700"
+              >
+                People
+              </Link>
+            </>
+          )}
           <div
             className="mx-4 bg-slate-700 text-yellow-300 w-10 h-10 flex items-center justify-center rounded-full hover:cursor-pointer"
             onClick={() => setLightMode(!lightMode)}
