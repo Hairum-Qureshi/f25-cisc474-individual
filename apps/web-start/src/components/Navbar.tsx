@@ -33,7 +33,11 @@ export default function Navbar() {
           <Link to="/dashboard" className="font-semibold text-sky-700">
             Dashboard
           </Link>
-          <Link to="/$uid/profile" params={{ uid: userID }}>
+          <Link
+            to="/$uid/profile"
+            params={{ uid: userID }}
+            className="font-semibold text-sky-700"
+          >
             Profile
           </Link>
           {params && 'courseID' in params && (
