@@ -4,11 +4,12 @@ export const Route = createFileRoute('/course/$courseID/grades')({
   component: RouteComponent,
 });
 
+// TODO - add a search bar
+
 function RouteComponent() {
   return (
     <div className="h-screen overflow-y-auto text-gray-900">
       <div className="max-w-5xl mx-auto py-5 px-6">
-        {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
           <div>
             <h2 className="text-3xl font-semibold tracking-tight">
@@ -22,7 +23,6 @@ function RouteComponent() {
           </div>
         </div>
       </div>
-      {/* Table */}
       <div className="mx-20 rounded-md border border-slate-300">
         <table className="w-full text-left text-gray-700 h-screen">
           <thead className="bg-gray-100 text-gray-500 text-sm uppercase tracking-wide">
