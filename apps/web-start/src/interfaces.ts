@@ -22,4 +22,9 @@ interface Course {
   updatedAt: string;
 }
 
-export type { FileSystemItemProps, CourseProps, Course };
+interface NavbarProps {
+  courseName?: string;
+  courseID?: string;
+}
+
+export type { FileSystemItemProps, CourseProps, Course, NavbarProps };
