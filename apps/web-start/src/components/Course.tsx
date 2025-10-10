@@ -1,9 +1,4 @@
-interface CourseProps {
-  courseName: string;
-  courseTimings: string;
-  professorName: string;
-  grade: string;
-}
+import { CourseProps } from "../interfaces";
 
 export default function Course({
   courseName,
