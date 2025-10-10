@@ -1,5 +1,5 @@
 export default function ModuleSection() {
   return (
-    <div className="bg-slate-300 text-black p-2 rounded-sm">Module Section</div>
+    <div className="bg-slate-400 text-white p-3 rounded-sm">Module Section</div>
   );
 }
