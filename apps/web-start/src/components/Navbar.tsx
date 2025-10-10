@@ -2,8 +2,9 @@ import { Link, useRouterState } from '@tanstack/react-router';
 import { useState } from 'react';
 import { IoSunny } from 'react-icons/io5';
 import { FaMoon } from 'react-icons/fa';
+import type { NavbarProps } from '../interfaces';
 
-export default function Navbar() {
+export default function Navbar({ courseName, courseID }: NavbarProps) {
   const [lightMode, setLightMode] = useState(true);
 
   const userID = '123';
@@ -40,6 +41,15 @@ export default function Navbar() {
           >
             Profile
           </Link>
+          {courseName && courseID && (
+            <Link
+              to="/course/$courseID"
+              params={{ courseID }}
+              className="font-semibold text-sky-700"
+            >
+              {courseName}
+            </Link>
+          )}
           {params && 'courseID' in params && (
             <>
               <Link
