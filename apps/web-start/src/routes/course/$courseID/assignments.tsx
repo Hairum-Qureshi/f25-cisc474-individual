@@ -14,7 +14,7 @@ function RouteComponent() {
   };
 
   return (
-    <div className="bg-slate-300 h-screen overflow-y-scroll">
+    <div className="h-screen overflow-y-scroll">
       <div className="flex-1 p-3 flex mx-10 space-x-4">
         <div className="w-3/4 flex-5 rounded-md bg-slate-200">
           <div className="flex items-center">
