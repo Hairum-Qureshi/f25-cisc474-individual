@@ -14,4 +14,12 @@ interface CourseProps {
   grade?: string;
 }
 
-export type { FileSystemItemProps, CourseProps };
+interface Course {
+  id: string;
+  courseName: string;
+  professorId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type { FileSystemItemProps, CourseProps, Course };
