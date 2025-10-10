@@ -75,7 +75,7 @@ function RouteComponent() {
             ].map((item) => (
               <tr
                 key={item.id}
-                className="hover:bg-gray-50 bg-neutral-100 transition-colors text-base hover:cursor-pointer"
+                className="hover:bg-gray-50 bg-slate-100 transition-colors text-base hover:cursor-pointer"
               >
                 <td className="px-6 py-4 text-gray-500">{item.id}</td>
                 <td className="px-6 py-4">
