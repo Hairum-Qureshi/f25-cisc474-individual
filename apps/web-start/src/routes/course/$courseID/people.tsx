@@ -34,6 +34,9 @@ function RouteComponent() {
       </div>
       <div className="w-full my-5 grid grid-cols-3 gap-3">
         <UserCard />
+        <UserCard />
+        <UserCard />
+        <UserCard />
       </div>
     </div>
   );

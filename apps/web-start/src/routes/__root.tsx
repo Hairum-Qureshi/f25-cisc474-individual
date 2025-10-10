@@ -33,7 +33,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="flex flex-col overflow-y-hidden">
+      <body className="flex flex-col">
         <Navbar /> {children}
         <TanStackDevtools
           config={{ position: 'bottom-right' }}

@@ -21,6 +21,7 @@ import { Route as CourseCourseIDMediaRouteImport } from './routes/course/$course
 import { Route as CourseCourseIDGradesRouteImport } from './routes/course/$courseID/grades'
 import { Route as CourseCourseIDAssignmentsRouteImport } from './routes/course/$courseID/assignments'
 import { Route as UidProfileSettingsRouteImport } from './routes/$uid/profile/settings'
+import { Route as CourseCourseIDAssignmentIDAssignmentRouteImport } from './routes/course/$courseID/$assignmentID/assignment'
 import { Route as AssignmentCourseCourseIDAssignmentsRouteImport } from './routes/assignment/course/$courseID/assignments'
 
 const DashboardRoute = DashboardRouteImport.update({
@@ -84,6 +85,12 @@ const UidProfileSettingsRoute = UidProfileSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => UidProfileRoute,
 } as any)
+const CourseCourseIDAssignmentIDAssignmentRoute =
+  CourseCourseIDAssignmentIDAssignmentRouteImport.update({
+    id: '/$assignmentID/assignment',
+    path: '/$assignmentID/assignment',
+    getParentRoute: () => CourseCourseIDRoute,
+  } as any)
 const AssignmentCourseCourseIDAssignmentsRoute =
   AssignmentCourseCourseIDAssignmentsRouteImport.update({
     id: '/assignment/course/$courseID/assignments',
@@ -105,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/course/$courseID/syllabus': typeof CourseCourseIDSyllabusRoute
   '/course/$courseID/': typeof CourseCourseIDIndexRoute
   '/assignment/course/$courseID/assignments': typeof AssignmentCourseCourseIDAssignmentsRoute
+  '/course/$courseID/$assignmentID/assignment': typeof CourseCourseIDAssignmentIDAssignmentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -119,6 +127,7 @@ export interface FileRoutesByTo {
   '/course/$courseID/syllabus': typeof CourseCourseIDSyllabusRoute
   '/course/$courseID': typeof CourseCourseIDIndexRoute
   '/assignment/course/$courseID/assignments': typeof AssignmentCourseCourseIDAssignmentsRoute
+  '/course/$courseID/$assignmentID/assignment': typeof CourseCourseIDAssignmentIDAssignmentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -135,6 +144,7 @@ export interface FileRoutesById {
   '/course/$courseID/syllabus': typeof CourseCourseIDSyllabusRoute
   '/course/$courseID/': typeof CourseCourseIDIndexRoute
   '/assignment/course/$courseID/assignments': typeof AssignmentCourseCourseIDAssignmentsRoute
+  '/course/$courseID/$assignmentID/assignment': typeof CourseCourseIDAssignmentIDAssignmentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/course/$courseID/syllabus'
     | '/course/$courseID/'
     | '/assignment/course/$courseID/assignments'
+    | '/course/$courseID/$assignmentID/assignment'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/course/$courseID/syllabus'
     | '/course/$courseID'
     | '/assignment/course/$courseID/assignments'
+    | '/course/$courseID/$assignmentID/assignment'
   id:
     | '__root__'
     | '/'
@@ -181,6 +193,7 @@ export interface FileRouteTypes {
     | '/course/$courseID/syllabus'
     | '/course/$courseID/'
     | '/assignment/course/$courseID/assignments'
+    | '/course/$courseID/$assignmentID/assignment'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -278,6 +291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UidProfileSettingsRouteImport
       parentRoute: typeof UidProfileRoute
     }
+    '/course/$courseID/$assignmentID/assignment': {
+      id: '/course/$courseID/$assignmentID/assignment'
+      path: '/$assignmentID/assignment'
+      fullPath: '/course/$courseID/$assignmentID/assignment'
+      preLoaderRoute: typeof CourseCourseIDAssignmentIDAssignmentRouteImport
+      parentRoute: typeof CourseCourseIDRoute
+    }
     '/assignment/course/$courseID/assignments': {
       id: '/assignment/course/$courseID/assignments'
       path: '/assignment/course/$courseID/assignments'
@@ -307,6 +327,7 @@ interface CourseCourseIDRouteChildren {
   CourseCourseIDPeopleRoute: typeof CourseCourseIDPeopleRoute
   CourseCourseIDSyllabusRoute: typeof CourseCourseIDSyllabusRoute
   CourseCourseIDIndexRoute: typeof CourseCourseIDIndexRoute
+  CourseCourseIDAssignmentIDAssignmentRoute: typeof CourseCourseIDAssignmentIDAssignmentRoute
 }
 
 const CourseCourseIDRouteChildren: CourseCourseIDRouteChildren = {
@@ -316,6 +337,8 @@ const CourseCourseIDRouteChildren: CourseCourseIDRouteChildren = {
   CourseCourseIDPeopleRoute: CourseCourseIDPeopleRoute,
   CourseCourseIDSyllabusRoute: CourseCourseIDSyllabusRoute,
   CourseCourseIDIndexRoute: CourseCourseIDIndexRoute,
+  CourseCourseIDAssignmentIDAssignmentRoute:
+    CourseCourseIDAssignmentIDAssignmentRoute,
 }
 
 const CourseCourseIDRouteWithChildren = CourseCourseIDRoute._addFileChildren(
