@@ -24,17 +24,27 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
     links: [{ rel: 'stylesheet', href: appCss }],
   }),
+  loader: async (context) => {
+    const courseID = (context.params as { courseID?: string }).courseID ?? '';
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/courses/${courseID}`,
+    );
+    return res.json();
+  },
   shellComponent: RootDocument,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const initialData = Route.useLoaderData();
+
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body className="flex flex-col">
-        <Navbar /> {children}
+        <Navbar courseName={initialData.courseName} courseID={initialData.id} />
+        {children}
         <TanStackDevtools
           config={{ position: 'bottom-right' }}
           plugins={[
