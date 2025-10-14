@@ -64,22 +64,23 @@ function RouteComponent() {
             </div>
           </div>
           <div className="space-y-5 mx-3 my-4">
-            {courseData?.map((course: ICourse) => {
-              return (
-                <Link
-                  to="/course/$courseID"
-                  params={{ courseID: course.id }}
-                  className="m-3"
-                >
-                  <Course
-                    courseName={course.courseName}
-                    courseTimings={'Course Timings TBD'}
-                    professorName={'Professor Name TBD'}
-                    grade={showGrades ? 'TBD' : ''}
-                  />
-                </Link>
-              );
-            })}
+            {courseData &&
+              courseData?.map((course: ICourse) => {
+                return (
+                  <Link
+                    to="/course/$courseID"
+                    params={{ courseID: course.id }}
+                    className="m-3"
+                  >
+                    <Course
+                      courseName={course.courseName}
+                      courseTimings={'Course Timings TBD'}
+                      professorName={'Professor Name TBD'}
+                      grade={showGrades ? 'TBD' : ''}
+                    />
+                  </Link>
+                );
+              })}
           </div>
         </div>
         <div className="w-1/2 rounded-md bg-slate-200">
