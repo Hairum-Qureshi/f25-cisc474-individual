@@ -45,7 +45,7 @@ export interface User {
 interface NavbarProps {
   courseName?: string;
   courseID?: string;
-  user: User;
+  user: User | undefined;
 }
 
 export type { FileSystemItemProps, CourseProps, Course, NavbarProps };
