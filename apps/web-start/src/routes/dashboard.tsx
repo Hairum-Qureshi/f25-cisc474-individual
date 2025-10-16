@@ -1,37 +1,53 @@
-import { Link, createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute, useLoaderData } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Course from '../components/Course';
 import Calendar from '../components/Calendar';
-// import Assignment from '../components/Assignment';
-// import Announcement from '../components/Announcement';
 import type { Course as ICourse } from '../interfaces';
 
+// Fetch function with proper error handling
+const fetchCourses = async () => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/courses`);
+  if (!res.ok) throw new Error(`Failed to fetch courses: ${res.status}`);
+  return res.json();
+};
+
 export const Route = createFileRoute('/dashboard')({
-  loader: async () => {
-    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/courses`);
-    return res.json();
-  },
+  loader: fetchCourses, // Loader uses the same fetch function
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const [showGrades, setShowGrades] = useState(false);
 
-  const initialData = Route.useLoaderData();
+  // Get initial data from loader
+  const initialData = useLoaderData({
+    from: '/dashboard',
+  });
 
-  const { data: courseData } = useQuery({
+  // React Query with proper error handling and retries
+  const {
+    data: courseData,
+    error,
+    isLoading,
+  } = useQuery({
     queryKey: ['courses'],
-    queryFn: () =>
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/courses`).then((r) =>
-        r.json(),
-      ),
+    queryFn: fetchCourses,
     initialData,
+    retry: 2, // retry failed requests
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setShowGrades(e.target.checked);
   };
+
+  if (isLoading) return <div className="p-5">Loading courses...</div>;
+  if (error)
+    return (
+      <div className="p-5 text-red-600">
+        Error loading courses: {(error as Error).message}
+      </div>
+    );
 
   return (
     <div className="bg-slate-300 min-h-screen h-auto">
@@ -64,23 +80,23 @@ function RouteComponent() {
             </div>
           </div>
           <div className="space-y-5 mx-3 my-4">
-            {courseData &&
-              courseData?.map((course: ICourse) => {
-                return (
-                  <Link
-                    to="/course/$courseID"
-                    params={{ courseID: course.id }}
-                    className="m-3"
-                  >
-                    <Course
-                      courseName={course.courseName}
-                      courseTimings={'Course Timings TBD'}
-                      professorName={'Professor Name TBD'}
-                      grade={showGrades ? 'TBD' : ''}
-                    />
-                  </Link>
-                );
-              })}
+            {courseData?.map((course: ICourse) => {
+              return (
+                <Link
+                  key={course.id}
+                  to="/course/$courseID"
+                  params={{ courseID: course.id }}
+                  className="m-3"
+                >
+                  <Course
+                    courseName={course.courseName}
+                    courseTimings={'Course Timings TBD'}
+                    professorName={'Professor Name TBD'}
+                    grade={showGrades ? 'TBD' : ''}
+                  />
+                </Link>
+              );
+            })}
           </div>
         </div>
         <div className="w-1/2 rounded-md bg-slate-200">
@@ -90,13 +106,6 @@ function RouteComponent() {
                 Upcoming Deadlines
               </h2>
               <div className="space-y-5 mx-3 my-4 h-60 overflow-y-auto">
-                {/* <Assignment />
-                <Assignment />
-                <Assignment />
-                <Assignment />
-                <Assignment />
-                <Assignment />
-                <Assignment /> */}
                 <p className="mx-3">
                   There are currently no assignments with upcoming deadlines 🎉
                 </p>
@@ -114,8 +123,6 @@ function RouteComponent() {
               <p className="mx-3">
                 There are currently no recent announcements
               </p>
-              {/* <Announcement />
-              <Announcement /> */}
             </div>
           </div>
         </div>
