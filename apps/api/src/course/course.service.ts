@@ -25,12 +25,14 @@ export class CourseService {
           select: {
             id: true,
             fullName: true,
+            profilePicture: true,
           },
         },
         students: {
           select: {
             id: true,
             fullName: true,
+            profilePicture: true,
           },
         },
         assignments: {
