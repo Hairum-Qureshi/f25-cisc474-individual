@@ -1,8 +1,7 @@
-// /course/$courseID/index.tsx
 import { createFileRoute } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
 import Assignment from '../../../components/Assignment';
 import Announcement from '../../../components/Announcement';
-import { useQuery } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/course/$courseID/')({
   component: CourseOverviewPage,
