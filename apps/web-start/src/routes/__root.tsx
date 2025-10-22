@@ -17,7 +17,7 @@ export interface MyRouterContext {
   queryClient: QueryClient;
 }
 
-const CURR_UID = 'cmg59bgtr0001y0djk2d1pmbs';
+const CURR_UID = 'cmg59bhdo001gy0dj7d80z796';
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
@@ -48,8 +48,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const initialData = Route.useLoaderData();
+  const [currUserData, setCurrUserData] = useState<User | undefined>();
 
-  const { data: currUserData } = useQuery({
+  const { data: courseData } = useQuery({
     queryKey: ['currUserData'],
     queryFn: () =>
       fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${CURR_UID}`).then((r) =>
@@ -65,8 +66,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="flex flex-col">
         <Navbar
-          courseName={initialData.courseData.courseName}
-          courseID={initialData.courseData.id}
+          courseName={courseData?.courseName}
+          courseID={courseData?.id}
           user={currUserData}
         />
         {children}
