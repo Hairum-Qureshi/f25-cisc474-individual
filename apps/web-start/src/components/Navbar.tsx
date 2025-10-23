@@ -7,7 +7,7 @@ import type { NavbarProps } from '../interfaces';
 export default function Navbar({ courseName, courseID }: NavbarProps) {
   const [lightMode, setLightMode] = useState(true);
 
-  const userID = '123';
+  const CURR_UID = 'cmh2oisew000tsbxm6kv4hqgw';
 
   const routerState = useRouterState();
 
@@ -36,7 +36,7 @@ export default function Navbar({ courseName, courseID }: NavbarProps) {
           </Link>
           <Link
             to="/$uid/profile"
-            params={{ uid: userID }}
+            params={{ uid: CURR_UID }}
             className="font-semibold text-sky-700"
           >
             Profile
