@@ -44,6 +44,16 @@ export class CourseService {
             module: true,
           },
         },
+        announcements: {
+          select: {
+            id: true,
+            title: true,
+            content: true,
+            courseID: true,
+            posterID: true,
+            createdAt: true,
+          },
+        },
       },
     });
   }
