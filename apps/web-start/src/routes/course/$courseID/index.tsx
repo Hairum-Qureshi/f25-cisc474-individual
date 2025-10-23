@@ -27,8 +27,10 @@ function CourseOverviewPage() {
       <div className="flex-1 p-3 flex space-x-4">
         <div className="w-1/2 flex-5 rounded-md bg-slate-200">
           <div className="flex items-center">
-            <h2 className="text-2xl font-semibold my-5 mx-5">
-              {isLoading ? 'Loading name...' : courseData?.courseName}
+            <h2 className="text-2xl font-semibold my-5 mx-3">
+              {isLoading
+                ? 'Loading name...'
+                : `About ${courseData?.courseName}`}
             </h2>
             <div className="ml-auto"></div>
           </div>
