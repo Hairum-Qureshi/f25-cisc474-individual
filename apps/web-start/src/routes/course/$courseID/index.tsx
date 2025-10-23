@@ -47,9 +47,10 @@ function CourseOverviewPage() {
                 Upcoming Deadlines
               </h2>
               <div className="space-y-5 mx-3 my-4 h-60 overflow-y-auto">
+                {/* <Assignment />
                 <Assignment />
-                <Assignment />
-                <Assignment />
+                <Assignment /> */}
+                <p>There are currently no upcoming deadlines.</p>
               </div>
             </div>
           </div>

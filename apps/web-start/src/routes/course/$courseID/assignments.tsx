@@ -79,8 +79,8 @@ function RouteComponent() {
                 <Module
                   key={index}
                   collapseAll={collapseAll}
-                  module={moduleName} // the key, e.g. "Module C"
-                  moduleMetaData={assignments as any} // the array of assignments
+                  module={moduleName}
+                  moduleMetaData={assignments as any}
                 />
               ),
             )}
