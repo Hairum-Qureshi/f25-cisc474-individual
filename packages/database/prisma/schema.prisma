@@ -190,5 +190,4 @@ model Deadline {
   @@index([ownerId])
 }
 
-
 // I used ChatGPT to help me write the Prisma models based off of the MongoDB schemas I wrote because I have a much better understanding of MongoDB than I do of Prisma at the moment. You can view my MongoDB schemas that I wrote here as proof: https://hypernotepad.com/n/ffee74124382375c
