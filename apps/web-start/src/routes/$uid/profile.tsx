@@ -2,15 +2,32 @@ import { createFileRoute } from '@tanstack/react-router';
 import { FaEdit, FaRegUserCircle } from 'react-icons/fa';
 import { useQueryClient } from '@tanstack/react-query';
 import Course from '../../components/Course';
-import type { User } from '../../interfaces';
 
 export const Route = createFileRoute('/$uid/profile')({
   component: RouteComponent,
+  loader: async (context) => {
+    const userID = (context.params as { uid?: string }).uid ?? '';
+
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/users/${userID}`,
+    );
+
+    if (!response.ok) {
+      console.error(
+        'User data fetch failed',
+        response.status,
+        await response.text(),
+      );
+      throw new Error('Failed to fetch user data');
+    }
+
+    const userData = await response.json();
+    return { userData };
+  },
 });
 
 function RouteComponent() {
-  const queryClient = useQueryClient();
-  const userData: User = queryClient.getQueryData(['currUserData']) as User;
+  const { userData } = Route.useLoaderData();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50 flex justify-center py-10">
@@ -19,7 +36,7 @@ function RouteComponent() {
           <div className="bg-white shadow-sm rounded-xl p-6 flex items-center gap-4 border border-gray-100">
             <img
               src={
-                userData.profilePicture ||
+                userData?.profilePicture ||
                 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg'
               }
               alt="Profile picture"
@@ -27,16 +44,14 @@ function RouteComponent() {
             />
             <div>
               <h2 className="text-3xl font-semibold text-gray-800">
-                {userData.fullName}
+                {userData?.fullName}
               </h2>
-              <p className="text-sm text-gray-500">
-                Student ID: {userData.id} | Major: Biology
-              </p>
+              <p className="text-sm text-gray-500">ID: {userData?.id}</p>
             </div>
           </div>
           <div className="bg-white shadow-sm rounded-xl p-6 border border-gray-100">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              {userData.fullName}'s Bio:
+              {userData?.fullName}'s Bio:
             </h3>
             <div className="space-y-4">
               <p className="text-slate-500">
