@@ -12,7 +12,6 @@ interface CourseProps {
   courseName: string;
   courseTimings: string;
   professorName: string;
-  grade?: string;
 }
 
 interface Course {
