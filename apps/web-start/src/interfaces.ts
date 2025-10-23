@@ -14,10 +14,20 @@ interface CourseProps {
   professorName: string;
 }
 
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  courseID: string;
+  posterID: string;
+  createdAt: string;
+}
+
 interface Course {
   id: string;
   courseName: string;
   professorId: string;
+  announcements?: Array<Announcement>;
   createdAt: string;
   updatedAt: string;
 }
