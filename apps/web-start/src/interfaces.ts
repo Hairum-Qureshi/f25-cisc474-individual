@@ -62,23 +62,23 @@ export interface User {
   enrolledCourses?: Array<EnrolledCourses>;
 }
 
-/*
-
-{
-"id": "cmh2olurh01cssb0r4aeu3vc2",
-"courseName": "Universal fresh-thinking strategy",
-"description": "Amicitia cultellus magnam deporto vorago quo tremo teneo velum sustineo. Bibo eos omnis aranea audeo. Vehemens atque varius.",
-"professorId": "cmh2oisaw0006sbxmrjg6knsg",
-"createdAt": "2025-10-23T00:26:12.604Z",
-"updatedAt": "2025-10-23T00:26:12.604Z"
-}
-
-*/
-
 interface UserCardProps {
   name: string;
   role: string;
   profilePicture: string;
 }
 
-export type { FileSystemItemProps, CourseProps, Course, UserCardProps };
+interface AnnouncementProps {
+  title: string;
+  poster: string;
+  content: string;
+}
+
+export type {
+  FileSystemItemProps,
+  CourseProps,
+  Course,
+  UserCardProps,
+  Announcement,
+  AnnouncementProps,
+};
