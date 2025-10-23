@@ -1,8 +1,4 @@
-interface UserCardProps {
-  name: string;
-  role: string;
-  profilePicture: string;
-}
+import type { UserCardProps } from "../interfaces";
 
 export default function UserCard({
   name,
