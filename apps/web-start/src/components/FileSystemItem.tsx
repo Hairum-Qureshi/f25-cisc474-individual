@@ -8,6 +8,7 @@ import {
 } from 'react-icons/fa';
 import React from 'react';
 import type { FileSystemItemProps } from '../interfaces';
+import { FaRegFileZipper } from 'react-icons/fa6';
 
 export default function FileSystemItem({
   fileSystemType,
@@ -20,7 +21,12 @@ export default function FileSystemItem({
     TXT: FaRegFileAlt,
     CODE: FaRegFileCode,
     WORD: FaFileWord,
+    DOC: FaFileWord,
+    DOCX: FaFileWord,
     IMAGE: FaRegFileImage,
+    JPG: FaRegFileImage,
+    PNG: FaRegFileImage,
+    ZIP: FaRegFileZipper,
   };
 
   return (
