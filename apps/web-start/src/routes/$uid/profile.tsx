@@ -91,8 +91,8 @@ function RouteComponent() {
                     <Course
                       key={course.id}
                       courseName={course.courseName}
-                      courseTimings={course.courseTimings || 'TBD'}
-                      professorName={course.professorName || 'TBD'}
+                      courseTimings={course.courseTimings || ''}
+                      professorName={course.professorName || ''}
                     />
                   ))
                 ) : (
