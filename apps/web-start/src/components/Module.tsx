@@ -30,15 +30,11 @@ export default function Module({
           {openModule ? <FaChevronUp /> : <FaChevronDown />}
         </button>
       </div>
-
       {openModule ||
         (collapseAll && (
           <div className="space-y-2 mx-3 mb-3">
             {moduleMetaData?.map((section: any) => (
-              <ModuleSection
-                key={section.id}
-                title={section.title}
-              />
+              <ModuleSection key={section.id} title={section.title} assignmentID = {section.id} />
             ))}
           </div>
         ))}
