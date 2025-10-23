@@ -1,15 +1,37 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { FaMagnifyingGlass } from 'react-icons/fa6';
 import { IoFilter } from 'react-icons/io5';
-import VideoLecture from '../../../components/VideoLecture';
+// import VideoLecture from '../../../components/VideoLecture';
 import FileSystemItem from '../../../components/FileSystemItem';
 import { FileSystemType, FileType } from '../../../enums';
 
 export const Route = createFileRoute('/course/$courseID/media')({
   component: RouteComponent,
+  loader: async (context) => {
+    const courseID = (context.params as { courseID?: string }).courseID ?? '';
+
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/files/${courseID}`,
+    );
+
+    if (!response.ok) {
+      console.error(
+        'Files fetch failed',
+        response.status,
+        await response.text(),
+      );
+      throw new Error('Failed to fetch files data');
+    }
+
+    const filesData = await response.json();
+    return { filesData };
+  },
 });
 
 function RouteComponent() {
+  const { filesData } = Route.useLoaderData();
+  console.log(filesData);
+
   return (
     <div className="h-screen overflow-y-scroll">
       <div className="flex-1 p-3 flex mx-10 space-x-4">
@@ -30,9 +52,12 @@ function RouteComponent() {
             </div>
           </div>
           <div className="space-y-5 m-3 h-screen overflow-y-scroll">
+            {/* <VideoLecture />
             <VideoLecture />
-            <VideoLecture />
-            <VideoLecture />
+            <VideoLecture /> */}
+            <p className="text-center">
+              Your professor hasn't uploaded any recorded video lectures yet.
+            </p>
           </div>
         </div>
         <div className="w-3/5 rounded-md bg-slate-200">
@@ -58,18 +83,29 @@ function RouteComponent() {
                 </div>
               </div>
               <div className="space-y-5 mx-3 my-4 h-screen overflow-y-auto">
-                <FileSystemItem
-                  fileSystemType={FileSystemType.FILE}
-                  fileType={FileType.PDF}
-                  fileName={'Course Notes.pdf'}
-                  fileSizeBytes={245}
-                />
-                <FileSystemItem
-                  fileSystemType={FileSystemType.FILE}
-                  fileType={FileType.WORD}
-                  fileName={'Course Syllabus'}
-                  fileSizeBytes={525}
-                />
+                {filesData.length === 0 ? (
+                  <p className="text-center">
+                    No files have been uploaded for this course yet.
+                  </p>
+                ) : (
+                  filesData.map((file: any) => (
+                    <FileSystemItem
+                      key={file.id}
+                      fileSystemType={FileSystemType.FILE} // ! hardcoded FILE for now
+                      fileType={
+                        file.displayName
+                          .split('.')
+                          .pop()
+                          .toUpperCase() as FileType
+                      }
+                      fileName={file.displayName}
+                      fileSizeBytes={
+                        Math.round((parseInt(file.size, 10) / 1000) * 10) / 10
+                      }
+                      createdAt = {file.createdAt}
+                    />
+                  ))
+                )}
               </div>
             </div>
           </div>
