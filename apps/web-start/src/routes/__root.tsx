@@ -6,18 +6,19 @@ import {
 } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { TanStackDevtools } from '@tanstack/react-devtools';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import TanStackQueryDevtools from '../integrations/devtools';
 import appCss from '../styles.css?url';
 import Navbar from '../components/Navbar';
-import { useQuery, type QueryClient } from '@tanstack/react-query';
-import { User } from '../interfaces';
+import type {QueryClient} from '@tanstack/react-query';
+import type { User } from '../interfaces';
 
 export interface MyRouterContext {
   queryClient: QueryClient;
 }
 
-const CURR_UID = 'cmg59bhdo001gy0dj7d80z796';
+const CURR_UID = 'cmh2oisew000tsbxm6kv4hqgw';
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
