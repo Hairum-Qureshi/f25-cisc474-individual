@@ -49,8 +49,6 @@ export class CourseService {
             id: true,
             title: true,
             content: true,
-            courseID: true,
-            posterID: true,
             createdAt: true,
           },
         },
