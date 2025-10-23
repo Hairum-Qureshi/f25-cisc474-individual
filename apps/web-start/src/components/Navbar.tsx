@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 export default function Navbar() {
   const [lightMode, setLightMode] = useState(true);
 
-  const CURR_UID = 'cmh2ol4jb001ksb0rhr07fa3j';
+  const CURR_UID = 'cmh3v8sgj0000y0gscplhgko8';
 
   const { data: currUserData } = useQuery({
     queryKey: ['currUserData'],
