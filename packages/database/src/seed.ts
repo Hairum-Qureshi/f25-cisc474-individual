@@ -10,56 +10,51 @@ async function main() {
   const fakePfp = () =>
     `https://i.pravatar.cc/150?img=${faker.number.int({ min: 1, max: 70 })}`;
 
-  // Users
+  // --- USERS ---
+  // Create instructors (professors)
+  const instructorData = Array.from({ length: 14 }).map(() => ({
+    email: faker.internet.email(),
+    password: faker.internet.password(),
+    fullName: faker.person.fullName(),
+    role: Role.INSTRUCTOR,
+    bio: optionalBio(),
+    profilePicture: fakePfp(),
+  }));
+  await prisma.user.createMany({ data: instructorData });
 
-  // Instructors
-  await prisma.user.createMany({
-    data: Array.from({ length: 14 }).map(() => ({
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      fullName: faker.person.fullName(),
-      role: Role.INSTRUCTOR,
-      bio: optionalBio(),
-      profilePicture: fakePfp(),
-    })),
-  });
+  // Create TAs
+  const taData = Array.from({ length: 15 }).map(() => ({
+    email: faker.internet.email(),
+    password: faker.internet.password(),
+    fullName: faker.person.fullName(),
+    role: Role.TA,
+    bio: optionalBio(),
+    profilePicture: fakePfp(),
+  }));
+  await prisma.user.createMany({ data: taData });
 
-  // TAs
-  await prisma.user.createMany({
-    data: Array.from({ length: 15 }).map(() => ({
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      fullName: faker.person.fullName(),
-      role: Role.TA,
-      bio: optionalBio(),
-      profilePicture: fakePfp(),
-    })),
-  });
+  // Create Students
+  const studentData = Array.from({ length: 40 }).map(() => ({
+    email: faker.internet.email(),
+    password: faker.internet.password(),
+    fullName: faker.person.fullName(),
+    role: Role.STUDENT,
+    bio: optionalBio(),
+    profilePicture: fakePfp(),
+  }));
+  await prisma.user.createMany({ data: studentData });
 
-  // Students
-  await prisma.user.createMany({
-    data: Array.from({ length: 40 }).map(() => ({
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      fullName: faker.person.fullName(),
-      role: Role.STUDENT,
-      bio: optionalBio(),
-      profilePicture: fakePfp(),
-    })),
-  });
-
-  // Admins
-  await prisma.user.createMany({
-    data: Array.from({ length: 10 }).map(() => ({
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      fullName: faker.person.fullName(),
-      role: Role.ADMIN,
-      bio: optionalBio(),
-      isAdmin: true,
-      profilePicture: fakePfp(),
-    })),
-  });
+  // Create Admins
+  const adminData = Array.from({ length: 10 }).map(() => ({
+    email: faker.internet.email(),
+    password: faker.internet.password(),
+    fullName: faker.person.fullName(),
+    role: Role.ADMIN,
+    bio: optionalBio(),
+    isAdmin: true,
+    profilePicture: fakePfp(),
+  }));
+  await prisma.user.createMany({ data: adminData });
 
   const instructors = await prisma.user.findMany({
     where: { role: Role.INSTRUCTOR },
@@ -74,13 +69,12 @@ async function main() {
     select: { id: true },
   });
 
-  // Courses
+  // --- COURSES ---
   for (let i = 0; i < 6; i++) {
     const randomInstructor = faker.helpers.arrayElement(instructors).id;
-    const maybeTAs =
+    const assignedTAs =
       i === 0 ? [] : faker.helpers.arrayElements(tas, { min: 1, max: 2 });
-    // Always pick at least 4 students, up to 10, re-using existing student IDs
-    const maybeStudents = faker.helpers.arrayElements(students, {
+    const enrolledStudents = faker.helpers.arrayElements(students, {
       min: 20,
       max: 30,
     });
@@ -88,14 +82,14 @@ async function main() {
     const course = await prisma.course.create({
       data: {
         courseName: faker.company.catchPhrase(),
+        description: faker.lorem.sentences(3),
         professorId: randomInstructor,
-        // re-use *existing* user IDs for TAs and students
-        tas: { connect: maybeTAs.map((t) => ({ id: t.id })) },
-        students: { connect: maybeStudents.map((s) => ({ id: s.id })) },
+        tas: { connect: assignedTAs.map((t) => ({ id: t.id })) },
+        students: { connect: enrolledStudents.map((s) => ({ id: s.id })) },
       },
     });
 
-    // Folders
+    // --- FOLDERS ---
     const root = await prisma.folder.create({
       data: { courseID: course.id, name: 'Root Folder' },
     });
@@ -106,7 +100,7 @@ async function main() {
       data: { courseID: course.id, name: 'Lecture Slides', parentId: child.id },
     });
 
-    // more test files
+    // --- FILES ---
     const testFiles = [
       { displayName: 'Intro.pdf', mimeType: 'application/pdf' },
       {
@@ -135,7 +129,7 @@ async function main() {
       }
     }
 
-    // Assignments with Modules
+    // --- ASSIGNMENTS ---
     const moduleNames = faker.helpers.arrayElements(
       ['Module A', 'Module B', 'Module C', 'Module D'],
       { min: 2, max: 4 },
@@ -156,7 +150,7 @@ async function main() {
           courseID: course.id,
           graderID: taGrader,
           totalPoints: faker.number.int({ min: 10, max: 100 }),
-          published: a === 2 ? false : true,
+          published: a !== 2,
           allowEarlyECSubmissionIncentive: allowEC,
           extraCreditTotalPointsIncentive: allowEC
             ? parseFloat((Math.random() * 1 + 0.1).toFixed(1))
@@ -165,95 +159,95 @@ async function main() {
         },
       });
 
-      if (maybeStudents.length > 0) {
-        const chosenStudents = faker.helpers.arrayElements(maybeStudents, {
-          min: 1,
-          max: Math.min(5, maybeStudents.length),
+      // --- SUBMISSIONS + GRADES ---
+      for (const s of enrolledStudents) {
+        const daysEarly = allowEC ? faker.number.int({ min: 0, max: 5 }) : 0;
+        const submissionDate = new Date(assignment.dueDate);
+        submissionDate.setDate(submissionDate.getDate() - daysEarly);
+
+        let feedbackText: string | null = null;
+        let feedbackPosterId: string | null = null;
+        if (Math.random() > 0.5) {
+          feedbackPosterId = taGrader ?? randomInstructor;
+          feedbackText = faker.lorem.sentences(2);
+        }
+
+        const maxPoints =
+          assignment.totalPoints + assignment.extraCreditTotalPointsIncentive;
+
+        const draftContent =
+          Math.random() > 0.5 ? faker.lorem.paragraph() : null;
+        const scheduledSubmitAt =
+          Math.random() > 0.5 ? faker.date.future() : null;
+        const isScheduledSubmitEnabled = Math.random() > 0.7;
+        const status = faker.helpers.arrayElement(
+          Object.values(SubmissionStatus),
+        );
+        const submissionType = faker.helpers.arrayElement(
+          Object.values(SubmissionType),
+        );
+
+        await prisma.submission.create({
+          data: {
+            assignmentID: assignment.id,
+            courseID: course.id,
+            studentID: s.id,
+            submissionType,
+            pointsEarned: faker.number.int({
+              min: 0,
+              max: Math.floor(maxPoints),
+            }),
+            createdAt: submissionDate,
+            feedback: feedbackText,
+            feedbackPosterId: feedbackPosterId,
+            draftContent,
+            scheduledSubmitAt,
+            isScheduledSubmitEnabled,
+            status,
+            type: submissionType,
+          },
         });
 
-        for (const s of chosenStudents) {
-          const daysEarly = allowEC ? faker.number.int({ min: 0, max: 5 }) : 0;
-          const submissionDate = new Date(assignment.dueDate);
-          submissionDate.setDate(submissionDate.getDate() - daysEarly);
-
-          // decide feedback + poster
-          let feedbackText: string | null = null;
-          let feedbackPosterId: string | null = null;
-          if (Math.random() > 0.5) {
-            feedbackPosterId =
-              taGrader ??
-              randomInstructor ??
-              (tas.length ? faker.helpers.arrayElement(tas).id : null) ??
-              (instructors.length
-                ? faker.helpers.arrayElement(instructors).id
-                : null);
-            if (feedbackPosterId) {
-              feedbackText = faker.lorem.sentences(2);
-            }
-          }
-
-          // calculate max points including extra credit
-          const maxPoints =
-            assignment.totalPoints + assignment.extraCreditTotalPointsIncentive;
-
-          // randomly decide draft content, scheduled submit, isScheduledEnabled, and status
-          const draftContent =
-            Math.random() > 0.5 ? faker.lorem.paragraph() : null;
-          const scheduledSubmitAt =
-            Math.random() > 0.5 ? faker.date.future() : null;
-          const isScheduledSubmitEnabled = Math.random() > 0.7;
-          const status = faker.helpers.arrayElement([
-            SubmissionStatus.NOT_SUBMITTED,
-            SubmissionStatus.SUBMITTED,
-            SubmissionStatus.GRADED,
-            SubmissionStatus.LATE,
-            SubmissionStatus.MISSING,
-            SubmissionStatus.DRAFT,
-            SubmissionStatus.EXCUSED,
-          ]);
-          const submissionType = faker.helpers.arrayElement([
-            SubmissionType.FILE,
-            SubmissionType.URL,
-            SubmissionType.TEXT,
-            SubmissionType.GOOGLE_DOC,
-          ]);
-
-          await prisma.submission.create({
-            data: {
-              assignmentID: assignment.id,
+        // Create or upsert grade — ensures every student has a grade in the course
+        await prisma.courseGrade.upsert({
+          where: {
+            courseID_studentID: {
               courseID: course.id,
               studentID: s.id,
-              submissionType,
-              pointsEarned: faker.number.int({
-                min: 0,
-                max: Math.floor(maxPoints),
-              }),
-              createdAt: submissionDate,
-              feedback: feedbackText,
-              feedbackPosterId: feedbackPosterId,
-              draftContent,
-              scheduledSubmitAt,
-              isScheduledSubmitEnabled,
-              status,
-              type: submissionType,
             },
-          });
-
-          await prisma.courseGrade.create({
-            data: {
-              courseID: course.id,
-              studentID: s.id,
-              numericGrade: faker.number.int({ min: 50, max: 100 }),
-            },
-          });
-        }
+          },
+          update: {},
+          create: {
+            courseID: course.id,
+            studentID: s.id,
+            numericGrade: faker.number.int({ min: 50, max: 100 }),
+          },
+        });
       }
+    }
+
+    // --- ANNOUNCEMENTS ---
+    const announcementCount = faker.number.int({ min: 2, max: 5 });
+    for (let j = 0; j < announcementCount; j++) {
+      await prisma.announcement.create({
+        data: {
+          title: faker.lorem.sentence(),
+          content: faker.lorem.paragraphs(2),
+          courseID: course.id,
+          posterID: randomInstructor,
+          pinned: Math.random() > 0.8,
+        },
+      });
     }
   }
 }
 
 main()
-  .then(() => console.log('✅ Seeding completed'))
+  .then(() =>
+    console.log(
+      '✅ Seeding completed with consistent professors, grades, announcements, and descriptions',
+    ),
+  )
   .catch((err) => {
     console.error('❌ Seeding error:', err);
     process.exit(1);
