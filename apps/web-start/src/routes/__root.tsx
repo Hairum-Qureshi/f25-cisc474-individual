@@ -18,7 +18,7 @@ export interface MyRouterContext {
   queryClient: QueryClient;
 }
 
-const CURR_UID = 'cmh2oisew000tsbxm6kv4hqgw';
+const CURR_UID = 'cmh2ol4jb001ksb0rhr07fa3j';
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
