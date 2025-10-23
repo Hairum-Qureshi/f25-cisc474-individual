@@ -52,7 +52,8 @@ model User {
   assignment      Assignment[]
   submission      Submission[]    @relation("SubmissionFeedbackPoster")
   isAdmin         Boolean         @default(false)
-  announcements   Announcement[]  // ✅ User can post multiple announcements
+  announcements   Announcement[]
+  deadlines       Deadline[]      @relation("UserDeadlines")
 
   @@index([email])
   @@index([role])
@@ -71,47 +72,26 @@ model Course {
   studentGrades CourseGrade[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  folders       Folder[]
   submissions   Submission[]
-  announcements Announcement[] // ✅ New relation to announcements
+  announcements Announcement[]
 
   @@index([courseName])
   @@index([professorId])
-}
-
-model Folder {
-  id        String   @id @default(cuid())
-  courseID  String
-  course    Course   @relation(fields: [courseID], references: [id], onDelete: Cascade)
-  name      String
-  parentId  String?
-  parent    Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children  Folder[] @relation("FolderHierarchy")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  files     File[]
-
-  @@index([courseID])
-  @@index([parentId])
 }
 
 model File {
   id          String   @id @default(cuid())
   courseID    String?
   course      Course?  @relation(fields: [courseID], references: [id], onDelete: Cascade)
-  folderID    String?
-  folder      Folder?  @relation(fields: [folderID], references: [id], onDelete: Cascade)
   uploaderID  String
   uploader    User     @relation("UserUploads", fields: [uploaderID], references: [id], onDelete: Cascade)
   displayName String
-  path        String?
   mimeType    String?
   size        Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([courseID])
-  @@index([folderID])
   @@index([uploaderID])
 }
 
@@ -181,7 +161,6 @@ model CourseGrade {
   @@unique([courseID, studentID], name: "courseID_studentID") 
 }
 
-
 model Announcement {
   id          String   @id @default(cuid())
   title       String
@@ -196,6 +175,19 @@ model Announcement {
 
   @@index([courseID])
   @@index([posterID])
+}
+
+model Deadline {
+  id                String   @id @default(cuid())
+  courseTitle       String
+  courseDescription String?
+  courseDeadline    DateTime
+  ownerId           String
+  owner             User     @relation("UserDeadlines", fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([ownerId])
 }
 
 
