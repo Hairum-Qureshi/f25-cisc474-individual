@@ -12,4 +12,8 @@ export class AssignmentService {
   async getAssignmentByCourseId(id: string) {
     return this.prisma.assignment.findMany({ where: { courseID: id } });
   }
+
+  async getAssignmentById(id: string) {
+    return this.prisma.assignment.findUnique({ where: { id } });
+  }
 }
