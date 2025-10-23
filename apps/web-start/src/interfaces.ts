@@ -30,6 +30,15 @@ enum Role {
   ADMIN = 'ADMIN',
 }
 
+interface EnrolledCourses {
+  id: string;
+  courseName: string;
+  description: string;
+  professorId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -41,7 +50,21 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   isAdmin: boolean;
+  enrolledCourses?: Array<EnrolledCourses>;
 }
+
+/*
+
+{
+"id": "cmh2olurh01cssb0r4aeu3vc2",
+"courseName": "Universal fresh-thinking strategy",
+"description": "Amicitia cultellus magnam deporto vorago quo tremo teneo velum sustineo. Bibo eos omnis aranea audeo. Vehemens atque varius.",
+"professorId": "cmh2oisaw0006sbxmrjg6knsg",
+"createdAt": "2025-10-23T00:26:12.604Z",
+"updatedAt": "2025-10-23T00:26:12.604Z"
+}
+
+*/
 
 interface UserCardProps {
   name: string;
@@ -49,9 +72,4 @@ interface UserCardProps {
   profilePicture: string;
 }
 
-export type {
-  FileSystemItemProps,
-  CourseProps,
-  Course,
-  UserCardProps,
-};
+export type { FileSystemItemProps, CourseProps, Course, UserCardProps };
