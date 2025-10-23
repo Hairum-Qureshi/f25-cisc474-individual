@@ -5,6 +5,7 @@ interface FileSystemItemProps {
   fileType?: FileType;
   fileName: string;
   fileSizeBytes: number;
+  createdAt: string;
 }
 
 interface CourseProps {
