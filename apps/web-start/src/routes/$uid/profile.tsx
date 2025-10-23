@@ -86,26 +86,18 @@ function RouteComponent() {
                 Courses Taking:
               </h3>
               <div className="space-y-5 mx-3 my-4">
-                <Course
-                  courseName={'Intro Into Computer Science'}
-                  courseTimings={'M, W, F - 2:30 PM to 4:00 PM'}
-                  professorName={'Professor Smith'}
-                />
-                <Course
-                  courseName={'Intro Into Data Structures & Algorithms'}
-                  courseTimings={'T, R - 1:30 PM to 3:00 PM'}
-                  professorName={'Professor Alex'}
-                />
-                <Course
-                  courseName={'English Literature'}
-                  courseTimings={'T, R - 3:30 PM to 4:15 PM'}
-                  professorName={'Professor Hue'}
-                />
-                <Course
-                  courseName={'Intro Into LLMs'}
-                  courseTimings={'M, T - 8:30 AM to 9:45 AM'}
-                  professorName={'Professor Jane'}
-                />
+                {userData?.enrolledCourses.length ? (
+                  userData.enrolledCourses?.map((course: any) => (
+                    <Course
+                      key={course.id}
+                      courseName={course.courseName}
+                      courseTimings={course.courseTimings || 'TBD'}
+                      professorName={course.professorName || 'TBD'}
+                    />
+                  ))
+                ) : (
+                  <p className="mx-3">No courses enrolled</p>
+                )}
               </div>
             </div>
           </div>
