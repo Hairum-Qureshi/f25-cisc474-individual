@@ -10,7 +10,7 @@ export const Route = createFileRoute('/course/$courseID/')({
 function CourseOverviewPage() {
   const { courseID } = Route.useParams();
 
-  const { data, isLoading } = useQuery({
+  const { data: courseData, isLoading } = useQuery({
     queryKey: [`course ${courseID}`],
     queryFn: ({ queryKey }) => {
       const keyString = queryKey[0];
@@ -28,12 +28,12 @@ function CourseOverviewPage() {
         <div className="w-1/2 flex-5 rounded-md bg-slate-200">
           <div className="flex items-center">
             <h2 className="text-2xl font-semibold my-5 mx-5">
-              {isLoading ? 'Loading name...' : data?.courseName}
+              {isLoading ? 'Loading name...' : courseData?.courseName}
             </h2>
             <div className="ml-auto"></div>
           </div>
           <div className="space-y-5 mx-3 h-3/4 my-2 overflow-y-scroll">
-            {/* Your lorem ipsum and content here */}
+            {isLoading ? 'Loading...' : courseData?.description}
           </div>
         </div>
 
