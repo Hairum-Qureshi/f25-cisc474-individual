@@ -4,14 +4,44 @@ import Module from '../../../components/Module';
 
 export const Route = createFileRoute('/course/$courseID/assignments')({
   component: RouteComponent,
+  loader: async (context) => {
+    const courseID = (context.params as { courseID?: string }).courseID ?? '';
+
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/assignments/${courseID}`,
+    );
+
+    if (!response.ok) {
+      console.error(
+        'Assignment fetch failed',
+        response.status,
+        await response.text(),
+      );
+      throw new Error('Failed to fetch assignment data');
+    }
+
+    const assignmentsData = await response.json();
+    return { assignmentsData };
+  },
 });
 
 function RouteComponent() {
   const [collapseAll, setCollapseAll] = useState(false);
+  const { assignmentsData } = Route.useLoaderData();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCollapseAll(e.target.checked);
   };
+
+  const groupedByModule = assignmentsData.reduce(
+    (acc: any, assignment: any) => {
+      const key = assignment.module;
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(assignment);
+      return acc;
+    },
+    {},
+  );
 
   return (
     <div className="h-screen overflow-y-scroll">
@@ -44,10 +74,16 @@ function RouteComponent() {
             </div>
           </div>
           <div className="space-y-5 mx-3 h-screen overflow-y-scroll">
-            <Module collapseAll={collapseAll} />
-            <Module collapseAll={collapseAll} />
-            <Module collapseAll={collapseAll} />
-            <Module collapseAll={collapseAll} />
+            {Object.entries(groupedByModule).map(
+              ([moduleName, assignments], index) => (
+                <Module
+                  key={index}
+                  collapseAll={collapseAll}
+                  module={moduleName} // the key, e.g. "Module C"
+                  moduleMetaData={assignments as any} // the array of assignments
+                />
+              ),
+            )}
           </div>
         </div>
         <div className="w-1/4 rounded-md bg-slate-200">
