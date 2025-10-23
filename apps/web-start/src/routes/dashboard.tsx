@@ -1,4 +1,4 @@
-import { Link, createFileRoute, useLoaderData } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import Course from '../components/Course';
 import Calendar from '../components/Calendar';
@@ -14,9 +14,9 @@ function RouteComponent() {
   const { data: currUserData, isLoading } = useQuery({
     queryKey: ['currUserData'],
     queryFn: () => {
-      return fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${CURR_UID}`).then(
-        (res) => res.json(),
-      );
+      return fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/users/${CURR_UID}`,
+      ).then((res) => res.json());
     },
   });
 
