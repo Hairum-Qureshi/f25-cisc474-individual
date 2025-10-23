@@ -1,253 +1,260 @@
+// seed.ts (Optimized)
 import { faker } from '@faker-js/faker';
 import { PrismaClient } from './client';
 import { Role, SubmissionType, SubmissionStatus } from './enums';
 
 const prisma = new PrismaClient();
 
-async function main() {
-  const optionalBio = () =>
-    Math.random() > 0.5 ? faker.lorem.sentences(2) : null;
-  const fakePfp = () =>
-    `https://i.pravatar.cc/150?img=${faker.number.int({ min: 1, max: 70 })}`;
+// helper utilities
+const fakePfp = () =>
+  `https://i.pravatar.cc/150?img=${faker.number.int({ min: 1, max: 70 })}`;
 
+const makeBio = () => {
+  const r = Math.random();
+  if (r < 0.18) return null;
+  if (r < 0.58) return faker.lorem.sentence();
+  if (r < 0.9)
+    return faker.lorem.paragraphs(faker.number.int({ min: 1, max: 2 }));
+  return faker.lorem.paragraphs(faker.number.int({ min: 3, max: 6 }));
+};
+
+const generateModuleNames = (count: number): string[] =>
+  Array.from(
+    { length: count },
+    () => `${faker.company.buzzPhrase()} ${faker.hacker.noun()}`,
+  );
+
+const longCourseDescription = () =>
+  faker.lorem.paragraphs(faker.number.int({ min: 2, max: 4 }), '\n\n');
+
+// helper: chunk large arrays
+const chunk = <T>(array: T[], size: number) =>
+  Array.from({ length: Math.ceil(array.length / size) }, (_, i) =>
+    array.slice(i * size, i * size + size),
+  );
+
+async function main() {
   // --- USERS ---
-  // Create instructors (professors)
-  const instructorData = Array.from({ length: 14 }).map(() => ({
+  const instructorsCount = 5;
+  const taCount = 5;
+  const studentCount = 20;
+  const adminCount = 3;
+
+  const instructors = Array.from({ length: instructorsCount }).map(() => ({
     email: faker.internet.email(),
     password: faker.internet.password(),
     fullName: faker.person.fullName(),
     role: Role.INSTRUCTOR,
-    bio: optionalBio(),
+    bio: makeBio(),
     profilePicture: fakePfp(),
   }));
-  await prisma.user.createMany({ data: instructorData });
-
-  // Create TAs
-  const taData = Array.from({ length: 15 }).map(() => ({
+  const tas = Array.from({ length: taCount }).map(() => ({
     email: faker.internet.email(),
     password: faker.internet.password(),
     fullName: faker.person.fullName(),
     role: Role.TA,
-    bio: optionalBio(),
+    bio: makeBio(),
     profilePicture: fakePfp(),
   }));
-  await prisma.user.createMany({ data: taData });
-
-  // Create Students
-  const studentData = Array.from({ length: 40 }).map(() => ({
+  const students = Array.from({ length: studentCount }).map(() => ({
     email: faker.internet.email(),
     password: faker.internet.password(),
     fullName: faker.person.fullName(),
     role: Role.STUDENT,
-    bio: optionalBio(),
+    bio: makeBio(),
     profilePicture: fakePfp(),
   }));
-  await prisma.user.createMany({ data: studentData });
-
-  // Create Admins
-  const adminData = Array.from({ length: 10 }).map(() => ({
+  const admins = Array.from({ length: adminCount }).map(() => ({
     email: faker.internet.email(),
     password: faker.internet.password(),
     fullName: faker.person.fullName(),
     role: Role.ADMIN,
-    bio: optionalBio(),
+    bio: makeBio(),
     isAdmin: true,
     profilePicture: fakePfp(),
   }));
-  await prisma.user.createMany({ data: adminData });
 
-  const instructors = await prisma.user.findMany({
-    where: { role: Role.INSTRUCTOR },
-    select: { id: true },
+  await prisma.user.createMany({
+    data: [...instructors, ...tas, ...students, ...admins],
   });
-  const tas = await prisma.user.findMany({
-    where: { role: Role.TA },
-    select: { id: true },
-  });
-  const students = await prisma.user.findMany({
-    where: { role: Role.STUDENT },
-    select: { id: true },
-  });
+
+  const [instructorIds, taIds, studentIds] = await Promise.all([
+    prisma.user.findMany({
+      where: { role: Role.INSTRUCTOR },
+      select: { id: true },
+    }),
+    prisma.user.findMany({ where: { role: Role.TA }, select: { id: true } }),
+    prisma.user.findMany({
+      where: { role: Role.STUDENT },
+      select: { id: true },
+    }),
+  ]);
 
   // --- COURSES ---
-  for (let i = 0; i < 6; i++) {
-    const randomInstructor = faker.helpers.arrayElement(instructors).id;
-    const assignedTAs =
-      i === 0 ? [] : faker.helpers.arrayElements(tas, { min: 1, max: 2 });
-    const enrolledStudents = faker.helpers.arrayElements(students, {
-      min: 20,
-      max: 30,
-    });
+  const totalCourses = 3;
+  const courseData = Array.from({ length: totalCourses }).map(() => {
+    const instructor = faker.helpers.arrayElement(instructorIds).id;
+    const assignedTAs = faker.helpers.arrayElements(taIds, { min: 1, max: 2 });
+    return {
+      courseName: faker.company.buzzPhrase(),
+      description: longCourseDescription(),
+      professorId: instructor,
+      tas: { connect: assignedTAs.map((t) => ({ id: t.id })) },
+    };
+  });
 
-    const course = await prisma.course.create({
+  // we have to create courses individually due to relation connections
+  const createdCourses = [];
+  for (const data of courseData) {
+    const course = await prisma.course.create({ data });
+    createdCourses.push(course);
+  }
+
+  // --- ENROLL STUDENTS ---
+  for (const s of studentIds) {
+    const randomCourses = faker.helpers.arrayElements(
+      createdCourses,
+      faker.number.int({ min: 1, max: 3 }),
+    );
+    await prisma.user.update({
+      where: { id: s.id },
       data: {
-        courseName: faker.company.catchPhrase(),
-        description: faker.lorem.sentences(3),
-        professorId: randomInstructor,
-        tas: { connect: assignedTAs.map((t) => ({ id: t.id })) },
-        students: { connect: enrolledStudents.map((s) => ({ id: s.id })) },
+        enrolledCourses: { connect: randomCourses.map((c) => ({ id: c.id })) },
       },
     });
+  }
 
-    // --- FOLDERS ---
-    const root = await prisma.folder.create({
-      data: { courseID: course.id, name: 'Root Folder' },
-    });
-    const child = await prisma.folder.create({
-      data: { courseID: course.id, name: 'Week 1', parentId: root.id },
-    });
-    const grandchild = await prisma.folder.create({
-      data: { courseID: course.id, name: 'Lecture Slides', parentId: child.id },
-    });
+  // --- FILES ---
+  const testFiles = [
+    { displayName: 'Syllabus.pdf', mimeType: 'application/pdf' },
+    { displayName: 'Lecture-01.pdf', mimeType: 'application/pdf' },
+    { displayName: 'Course-Policies.txt', mimeType: 'text/plain' },
+  ];
 
-    // --- FILES ---
-    const testFiles = [
-      { displayName: 'Intro.pdf', mimeType: 'application/pdf' },
-      {
-        displayName: 'Notes.docx',
-        mimeType:
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      },
-      { displayName: 'Homework.zip', mimeType: 'application/zip' },
-      { displayName: 'Image1.jpg', mimeType: 'image/jpeg' },
-      { displayName: 'Syllabus.txt', mimeType: 'text/plain' },
-    ];
-
+  const fileInserts = [];
+  for (const course of createdCourses) {
     for (const f of testFiles) {
-      if (Math.random() > 0.3) {
-        await prisma.file.create({
-          data: {
-            courseID: course.id,
-            folderID: grandchild.id,
-            uploaderID: randomInstructor,
-            displayName: f.displayName,
-            path: `/files/${f.displayName}`,
-            mimeType: f.mimeType,
-            size: faker.number.int({ min: 1024, max: 1024 * 50 }),
-          },
+      if (Math.random() > 0.25) {
+        fileInserts.push({
+          courseID: course.id,
+          uploaderID: course.professorId!,
+          displayName: f.displayName,
+          mimeType: f.mimeType,
+          size: faker.number.int({ min: 1024, max: 1024 * 50 }),
         });
       }
     }
+  }
+  await prisma.file.createMany({ data: fileInserts });
 
-    // --- ASSIGNMENTS ---
-    const moduleNames = faker.helpers.arrayElements(
-      ['Module A', 'Module B', 'Module C', 'Module D'],
-      { min: 2, max: 4 },
+  // --- ASSIGNMENTS, SUBMISSIONS, ANNOUNCEMENTS ---
+  const submissionBatch: any[] = [];
+  const gradeBatch: any[] = [];
+
+  for (const course of createdCourses) {
+    const taGrader = taIds.length ? faker.helpers.arrayElement(taIds).id : null;
+    const moduleNames = generateModuleNames(
+      faker.number.int({ min: 2, max: 3 }),
     );
 
-    for (let a = 0; a < 3; a++) {
-      const taGrader = tas.length ? faker.helpers.arrayElement(tas).id : null;
-      const allowEC = Math.random() > 0.5;
-      const revokedEC = Math.random() > 0.7;
-      const moduleName = faker.helpers.arrayElement(moduleNames);
+    const enrolledStudents = await prisma.user.findMany({
+      where: {
+        role: Role.STUDENT,
+        enrolledCourses: { some: { id: course.id } },
+      },
+      select: { id: true },
+    });
 
-      const assignment = await prisma.assignment.create({
-        data: {
-          title: `Assignment ${a + 1}: ${faker.hacker.phrase()}`,
-          description: faker.lorem.sentences(2),
-          module: moduleName,
-          dueDate: faker.date.future(),
-          courseID: course.id,
-          graderID: taGrader,
-          totalPoints: faker.number.int({ min: 10, max: 100 }),
-          published: a !== 2,
-          allowEarlyECSubmissionIncentive: allowEC,
-          extraCreditTotalPointsIncentive: allowEC
-            ? parseFloat((Math.random() * 1 + 0.1).toFixed(1))
-            : 0,
-          revokedECSubmissionIncentive: revokedEC,
-        },
-      });
-
-      // --- SUBMISSIONS + GRADES ---
-      for (const s of enrolledStudents) {
-        const daysEarly = allowEC ? faker.number.int({ min: 0, max: 5 }) : 0;
-        const submissionDate = new Date(assignment.dueDate);
-        submissionDate.setDate(submissionDate.getDate() - daysEarly);
-
-        let feedbackText: string | null = null;
-        let feedbackPosterId: string | null = null;
-        if (Math.random() > 0.5) {
-          feedbackPosterId = taGrader ?? randomInstructor;
-          feedbackText = faker.lorem.sentences(2);
-        }
-
-        const maxPoints =
-          assignment.totalPoints + assignment.extraCreditTotalPointsIncentive;
-
-        const draftContent =
-          Math.random() > 0.5 ? faker.lorem.paragraph() : null;
-        const scheduledSubmitAt =
-          Math.random() > 0.5 ? faker.date.future() : null;
-        const isScheduledSubmitEnabled = Math.random() > 0.7;
-        const status = faker.helpers.arrayElement(
-          Object.values(SubmissionStatus),
-        );
-        const submissionType = faker.helpers.arrayElement(
-          Object.values(SubmissionType),
-        );
-
-        await prisma.submission.create({
+    for (const moduleName of moduleNames) {
+      const assignmentsInModule = faker.number.int({ min: 1, max: 2 });
+      for (let a = 0; a < assignmentsInModule; a++) {
+        const assignment = await prisma.assignment.create({
           data: {
+            title: `${moduleName}: ${faker.helpers.arrayElement([
+              `Worksheet ${a + 1}`,
+              `Lab ${a + 1}`,
+              `Project ${a + 1}`,
+            ])}`,
+            description: faker.lorem.paragraph(),
+            module: moduleName,
+            dueDate: faker.date.future(),
+            courseID: course.id,
+            graderID: taGrader,
+            totalPoints: faker.number.int({ min: 10, max: 100 }),
+            published: true,
+          },
+        });
+
+        for (const s of enrolledStudents) {
+          const points = faker.number.int({
+            min: 0,
+            max: assignment.totalPoints,
+          });
+          submissionBatch.push({
             assignmentID: assignment.id,
             courseID: course.id,
             studentID: s.id,
-            submissionType,
-            pointsEarned: faker.number.int({
-              min: 0,
-              max: Math.floor(maxPoints),
+            submissionType: faker.helpers.arrayElement(
+              Object.values(SubmissionType),
+            ),
+            pointsEarned: points,
+            createdAt: faker.date.soon({
+              days: 10,
+              refDate: assignment.dueDate,
             }),
-            createdAt: submissionDate,
-            feedback: feedbackText,
-            feedbackPosterId: feedbackPosterId,
-            draftContent,
-            scheduledSubmitAt,
-            isScheduledSubmitEnabled,
-            status,
-            type: submissionType,
-          },
-        });
+            status: faker.helpers.arrayElement(Object.values(SubmissionStatus)),
+            type: faker.helpers.arrayElement(Object.values(SubmissionType)),
+          });
 
-        // Create or upsert grade — ensures every student has a grade in the course
-        await prisma.courseGrade.upsert({
-          where: {
-            courseID_studentID: {
-              courseID: course.id,
-              studentID: s.id,
-            },
-          },
-          update: {},
-          create: {
+          gradeBatch.push({
             courseID: course.id,
             studentID: s.id,
             numericGrade: faker.number.int({ min: 50, max: 100 }),
-          },
-        });
+          });
+        }
       }
     }
 
-    // --- ANNOUNCEMENTS ---
-    const announcementCount = faker.number.int({ min: 2, max: 5 });
-    for (let j = 0; j < announcementCount; j++) {
-      await prisma.announcement.create({
-        data: {
-          title: faker.lorem.sentence(),
-          content: faker.lorem.paragraphs(2),
-          courseID: course.id,
-          posterID: randomInstructor,
-          pinned: Math.random() > 0.8,
-        },
-      });
-    }
+    // Announcements
+    const announcementData = Array.from({
+      length: faker.number.int({ min: 1, max: 3 }),
+    }).map(() => ({
+      title: faker.lorem.sentence(),
+      content: faker.lorem.paragraphs(2, '\n\n'),
+      courseID: course.id,
+      posterID: course.professorId!,
+      pinned: Math.random() > 0.8,
+    }));
+    await prisma.announcement.createMany({ data: announcementData });
+  }
+
+  // --- BATCH SUBMISSIONS & GRADES ---
+  for (const batch of chunk(submissionBatch, 100)) {
+    await prisma.submission.createMany({ data: batch });
+  }
+
+  // upsert for course grades
+  for (const batch of chunk(gradeBatch, 100)) {
+    // Upsert isn't supported in createMany, so we’ll use transaction
+    await prisma.$transaction(
+      batch.map((g) =>
+        prisma.courseGrade.upsert({
+          where: {
+            courseID_studentID: {
+              courseID: g.courseID,
+              studentID: g.studentID,
+            },
+          },
+          update: {},
+          create: g,
+        }),
+      ),
+    );
   }
 }
 
 main()
-  .then(() =>
-    console.log(
-      '✅ Seeding completed with consistent professors, grades, announcements, and descriptions',
-    ),
-  )
+  .then(() => console.log('✅ Fast seeding completed.'))
   .catch((err) => {
     console.error('❌ Seeding error:', err);
     process.exit(1);
@@ -256,4 +263,4 @@ main()
     await prisma.$disconnect();
   });
 
-// Seed code was generated with the help of ChatGPT
+// code generated with the help of ChatGPT
