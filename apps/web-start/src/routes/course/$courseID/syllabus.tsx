@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/course/$courseID/syllabus')({
@@ -5,6 +6,20 @@ export const Route = createFileRoute('/course/$courseID/syllabus')({
 });
 
 function RouteComponent() {
+  const { courseID } = Route.useParams();
+
+  const { data: courseData, isLoading } = useQuery({
+    queryKey: [`course ${courseID}`],
+    queryFn: ({ queryKey }) => {
+      const keyString = queryKey[0];
+      const courseId = keyString?.split(' ')[1];
+
+      return fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/courses/${courseId}`,
+      ).then((res) => res.json());
+    },
+  });
+
   return (
     <div>
       <div className="min-h-screen bg-gray-50 rounded-md text-gray-800 antialiased">
@@ -12,11 +27,11 @@ function RouteComponent() {
           <header className="flex items-start justify-between gap-6">
             <div>
               <h1 className="text-3xl font-semibold tracking-tight">
-                CS 499 — Advanced Web Development
+                {isLoading ? 'Loading...' : courseData?.courseName} Syllabus
               </h1>
               <p className="mt-1 text-sm text-gray-600">
-                Instructor: Prof. A. Example · Spring 2026 · Tue/Thu 10:30-11:50
-                AM · Room 204
+                Instructor: {courseData?.professor.fullName} · Spring 2026 ·
+                Tue/Thu 10:30-11:50 AM · Room 204
               </p>
             </div>
             <div className="flex items-center gap-4">
@@ -33,7 +48,7 @@ function RouteComponent() {
                 <dl className="mt-3 text-sm text-gray-600 space-y-2">
                   <div>
                     <dt className="font-medium">Email</dt>
-                    <dd>prof.example@university.edu</dd>
+                    <dd>{courseData?.professor.email}</dd>
                   </div>
                   <div>
                     <dt className="font-medium">Office</dt>
