@@ -10,6 +10,6 @@ export class AnnouncementService {
   }
 
   async getAnnouncementById(id: string) {
-    return this.prisma.announcement.findMany({ where: { id } });
+    return this.prisma.announcement.findMany({ where: { courseID: id } });
   }
 }
