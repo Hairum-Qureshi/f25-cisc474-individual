@@ -10,6 +10,6 @@ export class FileService {
   }
 
   async getFileById(id: string) {
-    return this.prisma.file.findFirst({ where: { courseID: id } });
+    return this.prisma.file.findMany({ where: { courseID: id } });
   }
 }
