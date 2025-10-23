@@ -1,4 +1,4 @@
-// seed.ts (Optimized)
+// seed.ts (Optimized + ensure every user has >= 1 course)
 import { faker } from '@faker-js/faker';
 import { PrismaClient } from './client';
 import { Role, SubmissionType, SubmissionStatus } from './enums';
@@ -78,7 +78,7 @@ async function main() {
     data: [...instructors, ...tas, ...students, ...admins],
   });
 
-  const [instructorIds, taIds, studentIds] = await Promise.all([
+  const [instructorIds, taIds, studentIds, adminIds] = await Promise.all([
     prisma.user.findMany({
       where: { role: Role.INSTRUCTOR },
       select: { id: true },
@@ -88,6 +88,10 @@ async function main() {
       where: { role: Role.STUDENT },
       select: { id: true },
     }),
+    prisma.user.findMany({
+      where: { role: Role.ADMIN },
+      select: { id: true },
+    }), // <<<
   ]);
 
   // --- COURSES ---
@@ -104,9 +108,17 @@ async function main() {
   });
 
   // we have to create courses individually due to relation connections
-  const createdCourses = [];
+  // NOTE: include tas so we can enroll them too. // <<<
+  const createdCourses: Array<
+    Awaited<ReturnType<typeof prisma.course.create>> & {
+      tas: { id: string }[];
+    }
+  > = [];
   for (const data of courseData) {
-    const course = await prisma.course.create({ data });
+    const course = await prisma.course.create({
+      data,
+      include: { tas: { select: { id: true } } }, // <<<
+    });
     createdCourses.push(course);
   }
 
@@ -114,7 +126,7 @@ async function main() {
   for (const s of studentIds) {
     const randomCourses = faker.helpers.arrayElements(
       createdCourses,
-      faker.number.int({ min: 1, max: 3 }),
+      faker.number.int({ min: 1, max: Math.min(3, createdCourses.length) }),
     );
     await prisma.user.update({
       where: { id: s.id },
@@ -124,6 +136,55 @@ async function main() {
     });
   }
 
+  // --- ENROLL INSTRUCTORS & TAs INTO THEIR COURSES --- // <<<
+  for (const course of createdCourses) {
+    // Enroll the professor who teaches this course
+    if (course.professorId) {
+      await prisma.user.update({
+        where: { id: course.professorId },
+        data: { enrolledCourses: { connect: { id: course.id } } },
+      });
+    }
+    // Enroll all assigned TAs in the course
+    for (const ta of course.tas) {
+      await prisma.user.update({
+        where: { id: ta.id },
+        data: { enrolledCourses: { connect: { id: course.id } } },
+      });
+    }
+  }
+
+  // --- ENROLL ADMINS INTO 1-2 RANDOM COURSES (optional but keeps UI consistent) --- // <<<
+  for (const a of adminIds) {
+    const randomCourses = faker.helpers.arrayElements(
+      createdCourses,
+      faker.number.int({ min: 1, max: Math.min(2, createdCourses.length) }),
+    );
+    await prisma.user.update({
+      where: { id: a.id },
+      data: {
+        enrolledCourses: { connect: randomCourses.map((c) => ({ id: c.id })) },
+      },
+    });
+  }
+
+  // --- SAFETY NET: ENSURE *EVERY* USER HAS AT LEAST ONE ENROLLMENT --- // <<<
+  // (handles any edge cases, future roles, or logic changes above)
+  const unenrolledUsers = await prisma.user.findMany({
+    where: { enrolledCourses: { none: {} } },
+    select: { id: true },
+  });
+
+  if (unenrolledUsers.length && createdCourses.length) {
+    for (const u of unenrolledUsers) {
+      const fallbackCourse = faker.helpers.arrayElement(createdCourses);
+      await prisma.user.update({
+        where: { id: u.id },
+        data: { enrolledCourses: { connect: { id: fallbackCourse.id } } },
+      });
+    }
+  }
+
   // --- FILES ---
   const testFiles = [
     { displayName: 'Syllabus.pdf', mimeType: 'application/pdf' },
@@ -131,7 +192,7 @@ async function main() {
     { displayName: 'Course-Policies.txt', mimeType: 'text/plain' },
   ];
 
-  const fileInserts = [];
+  const fileInserts: any[] = [];
   for (const course of createdCourses) {
     for (const f of testFiles) {
       if (Math.random() > 0.25) {
@@ -235,7 +296,6 @@ async function main() {
 
   // upsert for course grades
   for (const batch of chunk(gradeBatch, 100)) {
-    // Upsert isn't supported in createMany, so we’ll use transaction
     await prisma.$transaction(
       batch.map((g) =>
         prisma.courseGrade.upsert({
@@ -254,7 +314,7 @@ async function main() {
 }
 
 main()
-  .then(() => console.log('✅ Fast seeding completed.'))
+  .then(() => console.log('✅ Seeding completed.'))
   .catch((err) => {
     console.error('❌ Seeding error:', err);
     process.exit(1);
@@ -262,5 +322,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-
-// code generated with the help of ChatGPT
