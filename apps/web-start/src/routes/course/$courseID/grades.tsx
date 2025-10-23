@@ -1,4 +1,4 @@
-import { createFileRoute, useLoaderData } from '@tanstack/react-router';
+import { createFileRoute, Link, useLoaderData } from '@tanstack/react-router';
 import type { User } from '../../../interfaces';
 
 const CURR_UID = 'cmh2ol4jb001ksb0rhr07fa3j';
@@ -59,17 +59,22 @@ function RouteComponent() {
             {assignmentsData?.map((assignment: any, index: number) => (
               <tr
                 key={assignment.id}
-                className="hover:bg-gray-50 bg-slate-100 transition-colors text-base hover:cursor-pointer"
+                className="hover:bg-gray-50 bg-slate-100 transition-colors text-base"
               >
                 <td className="px-6 py-4 text-gray-500">{index + 1}</td>
+
                 <td className="px-6 py-4">
-                  <div>
-                    <div className="font-medium text-blue-600">
-                      {assignment.title}
-                    </div>
-                  </div>
+                  <Link
+                    to="/course/$courseID/assignment/$assignmentID"
+                    params={{ courseID, assignmentID: assignment.id }}
+                    className="font-medium text-blue-600 hover:underline"
+                  >
+                    {assignment.title}
+                  </Link>
                 </td>
+
                 <td className="px-6 py-4 text-gray-500">{assignment.module}</td>
+
                 <td className="px-6 py-4 text-right">
                   {assignment.dueSoon ? (
                     <span className="bg-blue-100 text-blue-600 text-xs font-medium px-2 py-1 rounded-md">
