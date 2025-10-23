@@ -72,6 +72,7 @@ interface AnnouncementProps {
   title: string;
   poster: string;
   content: string;
+  date: string;
 }
 
 export type {
