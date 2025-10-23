@@ -19,6 +19,7 @@ export class CourseService {
             id: true,
             fullName: true,
             email: true,
+            profilePicture: true,
           },
         },
         tas: {
