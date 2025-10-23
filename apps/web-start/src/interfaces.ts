@@ -43,12 +43,6 @@ export interface User {
   isAdmin: boolean;
 }
 
-interface NavbarProps {
-  courseName?: string;
-  courseID?: string;
-  user: User | undefined;
-}
-
 interface UserCardProps {
   name: string;
   role: string;
@@ -59,6 +53,5 @@ export type {
   FileSystemItemProps,
   CourseProps,
   Course,
-  NavbarProps,
   UserCardProps,
 };
