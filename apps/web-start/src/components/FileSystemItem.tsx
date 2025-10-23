@@ -15,6 +15,7 @@ export default function FileSystemItem({
   fileType,
   fileName,
   fileSizeBytes,
+  createdAt,
 }: FileSystemItemProps) {
   const fileRecord: Record<string, React.FC> = {
     PDF: FaRegFilePdf,
@@ -40,7 +41,12 @@ export default function FileSystemItem({
       </div>
       <div className="ml-3">
         <h4 className="font-semibold">{fileName}</h4>
-        <p className="text-sm">Added 10/2/2025</p>
+        <p className="text-sm">
+          Added{' '}
+          {new Date(createdAt).toLocaleDateString('en-US', {
+            timeZone: 'America/New_York',
+          })}
+        </p>
       </div>
       <div className="ml-auto">{fileSizeBytes} KB</div>
     </div>
