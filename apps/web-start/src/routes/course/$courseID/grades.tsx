@@ -65,7 +65,7 @@ function RouteComponent() {
 
                 <td className="px-6 py-4">
                   <Link
-                    to="/course/$courseID/assignment/$assignmentID"
+                    to="/course/$courseID/$assignmentID/assignment"
                     params={{ courseID, assignmentID: assignment.id }}
                     className="font-medium text-blue-600 hover:underline"
                   >
