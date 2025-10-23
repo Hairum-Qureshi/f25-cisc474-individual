@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import Assignment from '../../../components/Assignment';
 import Announcement from '../../../components/Announcement';
+import type { Announcement as IAnnouncement } from '../../../interfaces';
 
 export const Route = createFileRoute('/course/$courseID/')({
   component: CourseOverviewPage,
@@ -58,8 +59,21 @@ function CourseOverviewPage() {
               Recent Announcements
             </h2>
             <div className="space-y-5 mx-3 my-4 h-60 overflow-y-auto">
-              <Announcement />
-              <Announcement />
+              {courseData?.announcements?.length === 0 ? (
+                <p className="mx-3">No announcements yet.</p>
+              ) : (
+                courseData?.announcements?.map(
+                  (announcement: IAnnouncement) => (
+                    <Announcement
+                      key={announcement.id}
+                      title={announcement.title}
+                      poster={''}
+                      content={announcement.content}
+                      date={announcement.createdAt}
+                    />
+                  ),
+                )
+              )}
             </div>
           </div>
         </div>
