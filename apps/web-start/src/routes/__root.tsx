@@ -6,19 +6,16 @@ import {
 } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { TanStackDevtools } from '@tanstack/react-devtools';
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import TanStackQueryDevtools from '../integrations/devtools';
 import appCss from '../styles.css?url';
 import Navbar from '../components/Navbar';
-import type {QueryClient} from '@tanstack/react-query';
-import type { User } from '../interfaces';
+import type { QueryClient } from '@tanstack/react-query';
 
 export interface MyRouterContext {
   queryClient: QueryClient;
 }
 
-const CURR_UID = 'cmh2ol4jb001ksb0rhr07fa3j';
+const CURR_UID = 'cmh3v8sgj0000y0gscplhgko8';
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
@@ -48,29 +45,13 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  const initialData = Route.useLoaderData();
-  const [currUserData, setCurrUserData] = useState<User | undefined>();
-
-  const { data: courseData } = useQuery({
-    queryKey: ['currUserData'],
-    queryFn: () =>
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${CURR_UID}`).then((r) =>
-        r.json(),
-      ),
-    initialData,
-  });
-
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body className="flex flex-col">
-        <Navbar
-          courseName={courseData?.courseName}
-          courseID={courseData?.id}
-          user={currUserData}
-        />
+        <Navbar />
         {children}
         <TanStackDevtools
           config={{ position: 'bottom-right' }}
