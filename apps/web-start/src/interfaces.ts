@@ -48,4 +48,16 @@ interface NavbarProps {
   user: User | undefined;
 }
 
-export type { FileSystemItemProps, CourseProps, Course, NavbarProps };
+interface UserCardProps {
+  name: string;
+  role: string;
+  profilePicture: string;
+}
+
+export type {
+  FileSystemItemProps,
+  CourseProps,
+  Course,
+  NavbarProps,
+  UserCardProps,
+};
