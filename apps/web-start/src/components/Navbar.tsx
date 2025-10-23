@@ -7,7 +7,7 @@ import type { NavbarProps } from '../interfaces';
 export default function Navbar({ courseName, courseID }: NavbarProps) {
   const [lightMode, setLightMode] = useState(true);
 
-  const CURR_UID = 'cmh2oisew000tsbxm6kv4hqgw';
+  const CURR_UID = 'cmh2ol4jb001ksb0rhr07fa3j';
 
   const routerState = useRouterState();
 
