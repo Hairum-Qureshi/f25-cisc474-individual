@@ -9,7 +9,7 @@ export class AssignmentService {
     return this.prisma.assignment.findMany();
   }
 
-  async getAssignmentById(id: string) {
+  async getAssignmentByCourseId(id: string) {
     return this.prisma.assignment.findMany({ where: { courseID: id } });
   }
 }
