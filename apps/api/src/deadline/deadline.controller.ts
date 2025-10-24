@@ -29,7 +29,7 @@ export class DeadlineController {
     return this.deadlineService.create(createCourseDto);
   }
 
-  @Patch()
+  @Patch(":id")
   async updateDeadline(
     @Param('id') id: string,
     @Body() updateDeadlineDto: DeadlineUpdateIn,
@@ -37,7 +37,7 @@ export class DeadlineController {
     return this.deadlineService.update(id, updateDeadlineDto);
   }
 
-  @Delete()
+  @Delete(':id')
   async deleteDeadline(@Param('id') id: string) {
     return this.deadlineService.delete(id);
   }
