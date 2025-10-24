@@ -103,6 +103,12 @@ interface Assignment {
   revokedECSubmissionIncentive: boolean;
 }
 
+interface ModuleProps {
+  collapseAll: boolean;
+  module: string;
+  moduleMetaData?: Array<Assignment>;
+}
+
 export type {
   FileSystemItemProps,
   CourseProps,
@@ -112,4 +118,5 @@ export type {
   AnnouncementProps,
   CourseGrade,
   Assignment,
+  ModuleProps,
 };
