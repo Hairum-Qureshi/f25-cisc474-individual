@@ -1,4 +1,5 @@
 import { Link, createFileRoute, useLoaderData } from '@tanstack/react-router';
+import type { Assignment, CourseGrade } from '../../../interfaces';
 
 export const Route = createFileRoute('/course/$courseID/grades')({
   component: RouteComponent,
@@ -10,7 +11,7 @@ export const Route = createFileRoute('/course/$courseID/grades')({
       fetch(`${import.meta.env.VITE_BACKEND_URL}/assignments/${courseID}`),
     ]);
 
-    let courseGradeData: any = null;
+    let courseGradeData: CourseGrade | null = null;
 
     if (courseGradeRes.ok) {
       try {
@@ -68,7 +69,7 @@ function RouteComponent() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 align-top">
-            {assignmentsData?.map((assignment: any, index: number) => (
+            {assignmentsData?.map((assignment: Assignment, index: number) => (
               <tr
                 key={assignment.id}
                 className="hover:bg-gray-50 bg-slate-100 transition-colors text-base align-top"
@@ -92,16 +93,10 @@ function RouteComponent() {
                 </td>
 
                 <td className="px-4 py-3 text-right align-top">
-                  {assignment.dueSoon ? (
-                    <span className="bg-blue-100 text-blue-600 text-xs font-medium px-2 py-1 rounded-md">
-                      Due Soon
-                    </span>
-                  ) : (
-                    <span className="font-semibold">
-                      {Math.floor(Math.random() * assignment.totalPoints)}/
-                      {assignment.totalPoints}
-                    </span>
-                  )}
+                  <span className="font-semibold">
+                    {Math.floor(Math.random() * assignment.totalPoints)}/
+                    {assignment.totalPoints}
+                  </span>
                 </td>
               </tr>
             ))}
