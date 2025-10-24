@@ -10,14 +10,8 @@ export class CourseController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  findAll(@CurrentUser() user: JwtUser) {
+  async getAllCourses(@CurrentUser() user: JwtUser) {
     console.log('User accessed:', user);
-    return this.courseService.getAllCourses();
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get()
-  async getAllCourses() {
     return this.courseService.getAllCourses();
   }
 
