@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
+import { FaPlus } from 'react-icons/fa';
 import Course from '../components/Course';
 import Calendar from '../components/Calendar';
 import type { Course as ICourse } from '../interfaces';
@@ -53,9 +54,17 @@ function RouteComponent() {
         <div className="w-1/2 rounded-md bg-slate-200">
           <div className="flex">
             <div className="w-1/2 overflow-y-scroll">
-              <h2 className="text-2xl font-semibold my-5 mx-5">
-                Upcoming Deadlines
-              </h2>
+              <div className="flex items-center">
+                <h2 className="text-2xl font-semibold my-5 mx-5">
+                  List Your Upcoming Deadlines
+                </h2>
+                <button
+                  className="hover:cursor-pointer text-sm bg-green-500 hover:bg-green-700 active:bg-green-600 text-white font-bold py-1.5 px-1.5 ml-auto rounded-md"
+                  title="Add button"
+                >
+                  <FaPlus />
+                </button>
+              </div>
               <div className="space-y-5 mx-3 my-4 h-60 overflow-y-auto">
                 <p className="mx-3">
                   There are currently no assignments with upcoming deadlines 🎉
