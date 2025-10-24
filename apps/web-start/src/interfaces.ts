@@ -109,6 +109,23 @@ interface ModuleProps {
   moduleMetaData?: Array<Assignment>;
 }
 
+interface UserData {
+  id: string;
+  fullName: string;
+  profilePicture: string;
+}
+
+interface CourseExtended extends Course {
+  description: string;
+  professor: {
+    email: string;
+  };
+  tas: Array<UserData>;
+  students: Array<UserData>;
+  assignments: Array<Assignment>;
+  announcements: Array<Announcement>;
+}
+
 export type {
   FileSystemItemProps,
   CourseProps,
@@ -119,4 +136,5 @@ export type {
   CourseGrade,
   Assignment,
   ModuleProps,
+  CourseExtended
 };
