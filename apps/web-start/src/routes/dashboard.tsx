@@ -29,11 +29,13 @@ function RouteComponent() {
     {
       id: '1',
       title: 'Assignment 1',
+      descrioption: 'First assignment description',
       dueDate: '2024-07-01',
     },
     {
       id: '2',
       title: 'Project Proposal',
+      description: 'Submit project proposal',
       dueDate: '2024-07-05',
     },
   ]);
@@ -109,6 +111,9 @@ function RouteComponent() {
                           <h3 className="text-lg font-semibold">
                             {deadline.title}
                           </h3>
+                          <p className="text-slate-500 text-sm">
+                            {deadline.description}
+                          </p>
                           <p className="text-sm text-gray-600">
                             Due Date: {deadline.dueDate}
                           </p>
@@ -140,6 +145,7 @@ function RouteComponent() {
                       const newDeadline = {
                         id: (deadlines.length + 1).toString(),
                         title: formData.get('title') as string,
+                        description: formData.get('description') as string,
                         dueDate: formData.get('dueDate') as string,
                       };
                       setDeadlines([newDeadline, ...deadlines]);
@@ -160,6 +166,19 @@ function RouteComponent() {
                         required
                         className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         maxLength={50}
+                      />
+                      <label
+                        htmlFor="description"
+                        className="block text-sm mt-2 font-medium text-gray-700"
+                      >
+                        Description
+                      </label>
+                      <textarea
+                        name="description"
+                        id="description"
+                        required
+                        className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        maxLength={60}
                       />
                     </div>
                     <div className="mb-3">
