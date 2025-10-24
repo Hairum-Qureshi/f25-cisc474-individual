@@ -8,9 +8,9 @@ import {
   Post,
 } from '@nestjs/common';
 import { DeadlineService } from './deadline.service';
-import { DeadlineCreateIn, DeadlineUpdateIn } from 'src/deadlines.dto';
+import { DeadlineCreateIn, DeadlineUpdateIn } from '@repo/api/deadlines';
 
-@Controller('deadline')
+@Controller('deadlines')
 export class DeadlineController {
   constructor(private readonly deadlineService: DeadlineService) {}
 
