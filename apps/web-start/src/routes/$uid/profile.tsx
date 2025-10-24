@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { FaEdit, FaRegUserCircle } from 'react-icons/fa';
-import { useQueryClient } from '@tanstack/react-query';
 import Course from '../../components/Course';
+import type { Course as ICourse } from '../../interfaces';
 
 export const Route = createFileRoute('/$uid/profile')({
   component: RouteComponent,
@@ -87,12 +87,12 @@ function RouteComponent() {
               </h3>
               <div className="space-y-5 mx-3 my-4">
                 {userData?.enrolledCourses.length ? (
-                  userData.enrolledCourses?.map((course: any) => (
+                  userData.enrolledCourses?.map((course: ICourse) => (
                     <Course
                       key={course.id}
                       courseName={course.courseName}
-                      courseTimings={course.courseTimings || ''}
-                      professorName={course.professorName || ''}
+                      courseTimings={''}
+                      professorName={''}
                     />
                   ))
                 ) : (
