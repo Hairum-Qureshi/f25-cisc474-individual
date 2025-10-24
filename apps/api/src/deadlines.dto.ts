@@ -1,42 +1,39 @@
 import { z } from 'zod';
 
-// Reference DTOs (lightweight relation embeds)
+// Reference DTO (lightweight)
 export const DeadlineRef = z.object({
-  id: z.string().uuid(),
-  title: z.string(),
-  dueDate: z.string().datetime(),
+  id: z.string(), // because you're using cuid()
+  courseTitle: z.string(),
+  courseDeadline: z.string().datetime(),
 });
 export type DeadlineRef = z.infer<typeof DeadlineRef>;
 
-// Output DTOs (API responses)
+// Output DTO (API responses)
 export const DeadlineOut = z.object({
-  id: z.string().uuid(),
-  title: z.string(),
-  dueDate: z.string().datetime(),
-  ownerId: z.string().uuid(),
+  id: z.string(),
+  courseTitle: z.string(),
+  courseDescription: z.string().optional().nullable(),
+  courseDeadline: z.string().datetime(),
+  ownerId: z.string(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
 export type DeadlineOut = z.infer<typeof DeadlineOut>;
 
-// Creation DTOs (API request bodies)
+// Creation DTO (API request bodies)
 export const DeadlineCreateIn = z.object({
-  title: z.string().min(1).max(50),
-  dueDate: z.string().datetime(),
-  ownerId: z.string().uuid(),
+  courseTitle: z.string().min(1).max(50),
+  courseDescription: z.string().optional().nullable(),
+  courseDeadline: z.string().datetime(),
+  ownerId: z.string(),
 });
 export type DeadlineCreateIn = z.infer<typeof DeadlineCreateIn>;
 
-// Update DTOs (API request bodies)
+// Update DTO (API request bodies)
 export const DeadlineUpdateIn = z.object({
-  title: z.string().min(1).max(50),
-  dueDate: z.string().datetime(),
-  ownerId: z.string().uuid().optional(),
+  courseTitle: z.string().min(1).max(50).optional(),
+  courseDescription: z.string().optional().nullable(),
+  courseDeadline: z.string().datetime().optional(),
+  ownerId: z.string().optional(),
 });
 export type DeadlineUpdateIn = z.infer<typeof DeadlineUpdateIn>;
-
-// Query DTOs (API query parameters)
-// export const CoursesListFilter = Pagination.extend({
-//   ownerId: z.string()uuid().optional(),
-//   nameLike: z.string().optional(),
-// });
