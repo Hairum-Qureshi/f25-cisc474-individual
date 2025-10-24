@@ -1,12 +1,7 @@
 import { useState } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6';
 import ModuleSection from './ModuleSection';
-
-interface ModuleProps {
-  collapseAll: boolean;
-  module: string;
-  moduleMetaData?: any[];
-}
+import type { Assignment, ModuleProps } from '../interfaces';
 
 // ! CollapseAll logic needs to be fixed
 
@@ -33,8 +28,12 @@ export default function Module({
       {openModule ||
         (collapseAll && (
           <div className="space-y-2 mx-3 mb-3">
-            {moduleMetaData?.map((section: any) => (
-              <ModuleSection key={section.id} title={section.title} assignmentID = {section.id} />
+            {moduleMetaData?.map((section: Assignment) => (
+              <ModuleSection
+                key={section.id}
+                title={section.title}
+                assignmentID={section.id}
+              />
             ))}
           </div>
         ))}
