@@ -67,11 +67,9 @@ function RouteComponent() {
       setCourseTitle('');
       setCourseDescription('');
       setCourseDeadline('');
-      alert('Deadline added!');
     },
     onError: (err) => {
       console.error('Failed to create deadline:', err);
-      alert('Failed to create deadline');
     },
   });
 
@@ -104,7 +102,6 @@ function RouteComponent() {
     },
     onError: (err) => {
       console.error('Failed to update deadline:', err);
-      alert('Failed to update deadline');
     },
   });
 
