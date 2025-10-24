@@ -126,6 +126,17 @@ interface CourseExtended extends Course {
   announcements: Array<Announcement>;
 }
 
+interface CourseFile {
+  id: string;
+  courseID: string;
+  displayName: string;
+  mimeType: string;
+  size: string;
+  uploaderID: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type {
   FileSystemItemProps,
   CourseProps,
@@ -136,5 +147,6 @@ export type {
   CourseGrade,
   Assignment,
   ModuleProps,
-  CourseExtended
+  CourseExtended,
+  CourseFile,
 };
