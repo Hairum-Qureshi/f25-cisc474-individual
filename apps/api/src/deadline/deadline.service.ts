@@ -13,6 +13,10 @@ export class DeadlineService {
     return deadlines;
   }
 
+  async getById(id: string) {
+    return this.prisma.deadline.findUnique({ where: { id } });
+  }
+
   async create(data: DeadlineCreateIn) {
     return this.prisma.deadline.create({
       data: {
