@@ -10,6 +10,7 @@ import { AssignmentModule } from './assignment/assignment.module';
 import { PrismaService } from './prisma.service';
 import { SubmissionModule } from './submission/submission.module';
 import { AnnouncementModule } from './announcement/announcement.module';
+import { DeadlineModule } from './deadline/deadline.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AnnouncementModule } from './announcement/announcement.module';
     CourseGradeModule,
     AssignmentModule,
     AnnouncementModule,
+    DeadlineModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
