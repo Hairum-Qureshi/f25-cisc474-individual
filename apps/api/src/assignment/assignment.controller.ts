@@ -11,6 +11,11 @@ export class AssignmentController {
   }
 
   @Get(':id')
+  async getAssignmentByCourseId(@Param('id') id: string) {
+    return this.assignmentService.getAssignmentByCourseId(id);
+  }
+
+  @Get(':id/assignment')
   async getAssignmentById(@Param('id') id: string) {
     return this.assignmentService.getAssignmentById(id);
   }

@@ -3,10 +3,32 @@ import { createFileRoute } from '@tanstack/react-router';
 export const Route = createFileRoute(
   '/course/$courseID/$assignmentID/assignment',
 )({
+  loader: async (context) => {
+    const assignmentID =
+      (context.params as { assignmentID?: string }).assignmentID ?? '';
+
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/assignments/${assignmentID}/assignment`,
+    );
+
+    if (!response.ok) {
+      console.error(
+        'Assignment data fetch failed',
+        response.status,
+        await response.text(),
+      );
+      throw new Error('Failed to fetch assignment data');
+    }
+
+    const assignmentData = await response.json();
+    return { assignmentData };
+  },
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { assignmentData } = Route.useLoaderData();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50 flex justify-center py-10 px-4">
       <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-8">
@@ -14,21 +36,21 @@ function RouteComponent() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 pb-4">
             <div>
               <h1 className="text-2xl font-semibold text-gray-800">
-                Machine Learning Assignment 3
+                {assignmentData?.title}
               </h1>
-              <p className="text-gray-500 text-sm mt-1">
-                Course: CS-410 | Instructor: Dr. Patel
-              </p>
             </div>
             <div className="mt-4 sm:mt-0 text-right">
               <p className="text-sm text-gray-600">
                 Due:{' '}
                 <span className="font-medium text-gray-800">
-                  October 18, 2025
+                  {new Date(assignmentData?.dueDate).toLocaleDateString()}
                 </span>
               </p>
               <p className="text-sm text-gray-600">
-                Points: <span className="font-medium text-gray-800">100</span>
+                Points:{' '}
+                <span className="font-medium text-gray-800">
+                  {assignmentData?.totalPoints}
+                </span>
               </p>
             </div>
           </div>
@@ -37,11 +59,7 @@ function RouteComponent() {
               Assignment Overview
             </h2>
             <p className="text-gray-700 text-sm leading-relaxed">
-              In this assignment, you will implement a simple linear regression
-              model from scratch using Python and NumPy. You are expected to
-              explore concepts such as cost functions, gradient descent, and
-              model evaluation metrics. Submit your code and a short report (1–2
-              pages) explaining your approach and results.
+              {assignmentData?.description}
             </p>
 
             <div className="mt-4 bg-gray-50 border border-gray-100 rounded-lg p-4">
@@ -66,12 +84,13 @@ function RouteComponent() {
               <span className="text-gray-700 font-medium text-sm">
                 Your Submission
               </span>
+
               <span className="text-xs text-blue-600 font-semibold bg-blue-100 px-2 py-1 rounded-full">
                 Not Submitted
               </span>
             </div>
             <p className="text-gray-600 text-sm mb-4">
-              You haven’t uploaded any files yet. Click below to submit your
+              You haven't uploaded any files yet. Click below to submit your
               assignment.
             </p>
             <div className="flex items-center gap-3">
@@ -88,23 +107,12 @@ function RouteComponent() {
           <h3 className="text-lg font-semibold text-gray-800 mb-3">
             Submission Feedback
           </h3>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            “Remember to visualize your loss curve and explain how you tuned
-            your learning rate. This will help demonstrate your understanding of
-            optimization concepts.”
-          </p>
-          <p className="text-xs text-gray-500 mt-3">— Dr. Patel</p>
+          <p className="text-base">No feedback available</p>
           <div className="mt-5 border-t border-yellow-200 pt-4">
             <h4 className="text-sm font-semibold text-gray-700 mb-2">
               Additional Tips:
             </h4>
-            <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1">
-              <li>
-                Try multiple learning rates and compare convergence speeds.
-              </li>
-              <li>Include at least one visualization (loss vs. epoch).</li>
-              <li>Comment your code for readability.</li>
-            </ul>
+            <p className="text-sm">No feedback available</p>
           </div>
         </div>
       </div>

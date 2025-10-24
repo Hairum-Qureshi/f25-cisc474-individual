@@ -10,6 +10,6 @@ export class CourseGradeService {
   }
 
   async getCourseGradeById(id: string) {
-    return this.prisma.courseGrade.findUnique({ where: { id } });
+    return this.prisma.courseGrade.findFirst({ where: { courseID: id } });
   }
 }

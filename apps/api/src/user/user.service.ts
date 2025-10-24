@@ -10,6 +10,11 @@ export class UserService {
   }
 
   async getUserById(id: string) {
-    return this.prisma.user.findUnique({ where: { id } });
+    return this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        enrolledCourses: true,
+      },
+    });
   }
 }

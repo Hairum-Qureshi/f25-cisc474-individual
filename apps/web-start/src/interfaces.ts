@@ -5,19 +5,29 @@ interface FileSystemItemProps {
   fileType?: FileType;
   fileName: string;
   fileSizeBytes: number;
+  createdAt: string;
 }
 
 interface CourseProps {
   courseName: string;
   courseTimings: string;
   professorName: string;
-  grade?: string;
+}
+
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  courseID: string;
+  posterID: string;
+  createdAt: string;
 }
 
 interface Course {
   id: string;
   courseName: string;
   professorId: string;
+  announcements?: Array<Announcement>;
   createdAt: string;
   updatedAt: string;
 }
@@ -27,6 +37,15 @@ enum Role {
   TA = 'TA',
   STUDENT = 'STUDENT',
   ADMIN = 'ADMIN',
+}
+
+interface EnrolledCourses {
+  id: string;
+  courseName: string;
+  description: string;
+  professorId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface User {
@@ -40,12 +59,100 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   isAdmin: boolean;
+  enrolledCourses?: Array<EnrolledCourses>;
 }
 
-interface NavbarProps {
-  courseName?: string;
-  courseID?: string;
-  user: User | undefined;
+interface UserCardProps {
+  name: string;
+  role: string;
+  profilePicture: string;
 }
 
-export type { FileSystemItemProps, CourseProps, Course, NavbarProps };
+interface AnnouncementProps {
+  title: string;
+  poster: string;
+  content: string;
+  date: string;
+}
+
+interface CourseGrade {
+  id: string;
+  courseID: string;
+  studentID: string;
+  numericGrade: number;
+  letterGrade: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Assignment {
+  id: string;
+  title: string;
+  description: string;
+  module: string;
+  dueDate: string;
+  courseID: string;
+  graderID: string;
+  totalPoints: number;
+  published: boolean;
+  submissionRequired: boolean;
+  createdAt: string;
+  updatedAt: string;
+  allowEarlyECSubmissionIncentive: boolean;
+  extraCreditTotalPointsIncentive: number;
+  revokedECSubmissionIncentive: boolean;
+}
+
+interface ModuleProps {
+  collapseAll: boolean;
+  module: string;
+  moduleMetaData?: Array<Assignment>;
+}
+
+interface UserData {
+  id: string;
+  fullName: string;
+  profilePicture: string;
+}
+
+interface CourseMember extends UserData {
+  role: string;
+}
+
+interface CourseExtended extends Course {
+  description: string;
+  professor: {
+    email: string;
+  };
+  tas: Array<UserData>;
+  students: Array<UserData>;
+  assignments: Array<Assignment>;
+  announcements: Array<Announcement>;
+}
+
+interface CourseFile {
+  id: string;
+  courseID: string;
+  displayName: string;
+  mimeType: string;
+  size: string;
+  uploaderID: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type {
+  FileSystemItemProps,
+  CourseProps,
+  Course,
+  UserCardProps,
+  Announcement,
+  AnnouncementProps,
+  CourseGrade,
+  Assignment,
+  ModuleProps,
+  UserData,
+  CourseExtended,
+  CourseFile,
+  CourseMember,
+};

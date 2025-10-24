@@ -10,6 +10,49 @@ export class CourseService {
   }
 
   async getCourseById(id: string) {
-    return this.prisma.course.findUnique({ where: { id } });
+    // used ChatGPT to understand how to use Prisma to populate the ID references to get more data
+    return this.prisma.course.findUnique({
+      where: { id },
+      include: {
+        professor: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+        tas: {
+          select: {
+            id: true,
+            fullName: true,
+            profilePicture: true,
+          },
+        },
+        students: {
+          select: {
+            id: true,
+            fullName: true,
+            profilePicture: true,
+          },
+        },
+        assignments: {
+          select: {
+            id: true,
+            title: true,
+            dueDate: true,
+            module: true,
+          },
+        },
+        announcements: {
+          select: {
+            id: true,
+            title: true,
+            content: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
   }
 }

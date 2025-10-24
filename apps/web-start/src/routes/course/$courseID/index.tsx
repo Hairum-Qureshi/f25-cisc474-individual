@@ -1,23 +1,42 @@
-// /course/$courseID/index.tsx
 import { createFileRoute } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
 import Assignment from '../../../components/Assignment';
 import Announcement from '../../../components/Announcement';
+import type { Announcement as IAnnouncement } from '../../../interfaces';
 
 export const Route = createFileRoute('/course/$courseID/')({
   component: CourseOverviewPage,
 });
 
 function CourseOverviewPage() {
+  const { courseID } = Route.useParams();
+
+  const { data: courseData, isLoading } = useQuery({
+    queryKey: [`course ${courseID}`],
+    queryFn: ({ queryKey }) => {
+      const keyString = queryKey[0];
+      const courseId = keyString?.split(' ')[1];
+
+      return fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/courses/${courseId}`,
+      ).then((res) => res.json());
+    },
+  });
+
   return (
     <div className="bg-slate-300 h-screen">
       <div className="flex-1 p-3 flex space-x-4">
         <div className="w-1/2 flex-5 rounded-md bg-slate-200">
           <div className="flex items-center">
-            <h2 className="text-2xl font-semibold my-5 mx-5">Course 1</h2>
+            <h2 className="text-2xl font-semibold my-5 mx-3">
+              {isLoading
+                ? 'Loading name...'
+                : `About ${courseData?.courseName}`}
+            </h2>
             <div className="ml-auto"></div>
           </div>
           <div className="space-y-5 mx-3 h-3/4 my-2 overflow-y-scroll">
-            {/* Your lorem ipsum and content here */}
+            {isLoading ? 'Loading...' : courseData?.description}
           </div>
         </div>
 
@@ -28,9 +47,10 @@ function CourseOverviewPage() {
                 Upcoming Deadlines
               </h2>
               <div className="space-y-5 mx-3 my-4 h-60 overflow-y-auto">
+                {/* <Assignment />
                 <Assignment />
-                <Assignment />
-                <Assignment />
+                <Assignment /> */}
+                <p>There are currently no upcoming deadlines.</p>
               </div>
             </div>
           </div>
@@ -40,8 +60,21 @@ function CourseOverviewPage() {
               Recent Announcements
             </h2>
             <div className="space-y-5 mx-3 my-4 h-60 overflow-y-auto">
-              <Announcement />
-              <Announcement />
+              {courseData?.announcements?.length === 0 ? (
+                <p className="mx-3">No announcements yet.</p>
+              ) : (
+                courseData?.announcements?.map(
+                  (announcement: IAnnouncement) => (
+                    <Announcement
+                      key={announcement.id}
+                      title={announcement.title}
+                      poster={''}
+                      content={announcement.content}
+                      date={announcement.createdAt}
+                    />
+                  ),
+                )
+              )}
             </div>
           </div>
         </div>

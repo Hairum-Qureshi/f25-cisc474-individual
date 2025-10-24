@@ -2,32 +2,55 @@ import { Link, useRouterState } from '@tanstack/react-router';
 import { useState } from 'react';
 import { IoSunny } from 'react-icons/io5';
 import { FaMoon } from 'react-icons/fa';
-import type { NavbarProps } from '../interfaces';
+import { useQuery } from '@tanstack/react-query';
 
-export default function Navbar({ courseName, courseID }: NavbarProps) {
+export default function Navbar() {
   const [lightMode, setLightMode] = useState(true);
 
-  const userID = '123';
+  const CURR_UID = 'cmh3v8sgj0000y0gscplhgko8';
+
+  const { data: currUserData } = useQuery({
+    queryKey: ['currUserData'],
+    queryFn: () => {
+      return fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/users/${CURR_UID}`,
+      ).then((res) => res.json());
+    },
+  });
 
   const routerState = useRouterState();
+  const currentMatch = routerState.matches.at(-1);
+  const params = currentMatch?.params as { courseID?: string } | undefined;
+  const courseID = params?.courseID;
 
-  const currentMatch = routerState.matches.at(-1); // last match in the stack
-  const params = currentMatch?.params;
+  const { data: courseData } = useQuery({
+    queryKey: [`course ${courseID}`],
+    queryFn: ({ queryKey }) => {
+      const keyString = queryKey[0];
+      const courseId = keyString?.split(' ')[1];
+
+      return fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/courses/${courseId}`,
+      ).then((res) => res.json());
+    },
+  });
 
   return (
     <nav className="w-full bg-slate-200 p-4 h-20">
       <div className="flex items-center">
-        <div className="w-12 h-12 rounded-md border-2 border-slate-400">
+        <div className="w-12 h-12 rounded-lg border-2 border-slate-400">
           <img
-            src="https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg"
+            src={currUserData?.profilePicture}
             alt="User profile picture"
             className="w-full h-full rounded-md object-cover"
           />
         </div>
         <div className="flex flex-col">
-          <h3 className="font-semibold ml-3 text-lg">Hairum Qureshi</h3>
+          <h3 className="font-semibold ml-3 text-lg">
+            {currUserData?.fullName}
+          </h3>
           <h3 className="font-semibold ml-3 text-slate-600 text-sm">
-            UID: 123451251
+            UID: {currUserData?.id}
           </h3>
         </div>
         <div className="ml-auto flex items-center space-x-5">
@@ -36,53 +59,53 @@ export default function Navbar({ courseName, courseID }: NavbarProps) {
           </Link>
           <Link
             to="/$uid/profile"
-            params={{ uid: userID }}
+            params={{ uid: CURR_UID }}
             className="font-semibold text-sky-700"
           >
             Profile
           </Link>
-          {courseName && courseID && (
+          {courseData?.courseName && courseID && (
             <Link
               to="/course/$courseID"
               params={{ courseID }}
               className="font-semibold text-sky-700"
             >
-              {courseName}
+              {courseData?.courseName}
             </Link>
           )}
-          {params && 'courseID' in params && (
+          {courseID && (
             <>
               <Link
                 to="/course/$courseID/syllabus"
-                params={{ courseID: params.courseID }}
+                params={{ courseID }}
                 className="font-semibold text-sky-700"
               >
                 Syllabus
               </Link>
               <Link
                 to="/course/$courseID/media"
-                params={{ courseID: params.courseID }}
+                params={{ courseID }}
                 className="font-semibold text-sky-700"
               >
                 Media & Files
               </Link>
               <Link
                 to="/course/$courseID/assignments"
-                params={{ courseID: params.courseID }}
+                params={{ courseID }}
                 className="font-semibold text-sky-700"
               >
                 Assignments
               </Link>
               <Link
                 to="/course/$courseID/grades"
-                params={{ courseID: params.courseID }}
+                params={{ courseID }}
                 className="font-semibold text-sky-700"
               >
                 Grades
               </Link>
               <Link
                 to="/course/$courseID/people"
-                params={{ courseID: params.courseID }}
+                params={{ courseID }}
                 className="font-semibold text-sky-700"
               >
                 People
