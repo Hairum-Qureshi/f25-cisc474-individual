@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import Module from '../../../components/Module';
-import { Assignment } from '../../../interfaces';
+import type { Assignment } from '../../../interfaces';
 
 export const Route = createFileRoute('/course/$courseID/assignments')({
   component: RouteComponent,
@@ -81,7 +81,7 @@ function RouteComponent() {
                   key={index}
                   collapseAll={collapseAll}
                   module={moduleName}
-                  moduleMetaData={assignments as any}
+                  moduleMetaData={assignments as Array<Assignment>}
                 />
               ),
             )}
