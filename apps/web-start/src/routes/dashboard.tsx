@@ -94,16 +94,18 @@ function RouteComponent() {
                 )}
               </div>
               <div className="space-y-5 mx-3 h-60 overflow-y-auto">
-                {!deadlines.length ? (
+                {!deadlines.length && !showForm ? (
                   <p>No upcoming deadlines</p>
                 ) : (
+                  deadlines.length &&
+                  !showForm &&
                   deadlines.map((deadline) => {
                     return (
                       <div
                         key={deadline.id}
                         className="bg-white p-3 rounded-md shadow-md flex items-center"
                       >
-                        <div>
+                        <div className="w-3/4 break-words">
                           <h3 className="text-lg font-semibold">
                             {deadline.title}
                           </h3>
@@ -111,16 +113,16 @@ function RouteComponent() {
                             Due Date: {deadline.dueDate}
                           </p>
                         </div>
-                        <div className="ml-auto space-x-2">
+                        <div className="ml-auto space-x-2 flex flex-col space-y-2">
                           <button
                             title="Trash button"
-                            className="hover:cursor-pointer text-red-500 bg-red-200 border active:bg-red-700 border-red-600 p-1 rounded-md"
+                            className="hover:cursor-pointer text-red-500 bg-red-200 border active:bg-red-700 border-red-600 p-1 w-7 rounded-md flex items-center justify-center"
                           >
                             <FaTrash />
                           </button>
                           <button
                             title="Edit button"
-                            className="hover:cursor-pointer text-orange-500 bg-orange-200 border active:bg-orange-700 border-orange-600 p-1 rounded-md"
+                            className="hover:cursor-pointer text-orange-500 bg-orange-200 border active:bg-orange-700 border-orange-600 p-1 w-7 rounded-md flex items-center justify-center"
                           >
                             <FaEdit />
                           </button>
@@ -128,6 +130,60 @@ function RouteComponent() {
                       </div>
                     );
                   })
+                )}
+                {showForm && (
+                  <form
+                    className="bg-white p-3 rounded-md shadow-md"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const formData = new FormData(e.currentTarget);
+                      const newDeadline = {
+                        id: (deadlines.length + 1).toString(),
+                        title: formData.get('title') as string,
+                        dueDate: formData.get('dueDate') as string,
+                      };
+                      setDeadlines([newDeadline, ...deadlines]);
+                      setShowForm(false);
+                    }}
+                  >
+                    <div className="mb-3">
+                      <label
+                        htmlFor="title"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Title
+                      </label>
+                      <input
+                        type="text"
+                        name="title"
+                        id="title"
+                        required
+                        className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        maxLength={50}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label
+                        htmlFor="dueDate"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Due Date
+                      </label>
+                      <input
+                        type="date"
+                        name="dueDate"
+                        id="dueDate"
+                        required
+                        className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md"
+                    >
+                      Add Deadline
+                    </button>
+                  </form>
                 )}
               </div>
             </div>
