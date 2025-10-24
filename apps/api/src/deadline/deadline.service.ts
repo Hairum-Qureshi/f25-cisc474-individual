@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { DeadlineCreateIn, DeadlineUpdateIn } from 'src/deadlines.dto';
+import { DeadlineCreateIn, DeadlineUpdateIn } from '@repo/api/deadlines';
 
 @Injectable()
 export class DeadlineService {
