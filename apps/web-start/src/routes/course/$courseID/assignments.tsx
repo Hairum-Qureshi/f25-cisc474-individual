@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import Module from '../../../components/Module';
+import { Assignment } from '../../../interfaces';
 
 export const Route = createFileRoute('/course/$courseID/assignments')({
   component: RouteComponent,
@@ -34,7 +35,7 @@ function RouteComponent() {
   };
 
   const groupedByModule = assignmentsData.reduce(
-    (acc: any, assignment: any) => {
+    (acc: { [x: string]: Array<Assignment> }, assignment: Assignment) => {
       const key = assignment.module;
       if (!acc[key]) acc[key] = [];
       acc[key].push(assignment);
