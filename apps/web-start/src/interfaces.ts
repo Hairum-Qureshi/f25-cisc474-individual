@@ -115,6 +115,10 @@ interface UserData {
   profilePicture: string;
 }
 
+interface CourseMember extends UserData {
+  role: string;
+}
+
 interface CourseExtended extends Course {
   description: string;
   professor: {
@@ -147,6 +151,8 @@ export type {
   CourseGrade,
   Assignment,
   ModuleProps,
+  UserData,
   CourseExtended,
   CourseFile,
+  CourseMember,
 };
