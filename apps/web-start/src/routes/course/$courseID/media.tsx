@@ -3,7 +3,9 @@ import { FaMagnifyingGlass } from 'react-icons/fa6';
 import { IoFilter } from 'react-icons/io5';
 // import VideoLecture from '../../../components/VideoLecture';
 import FileSystemItem from '../../../components/FileSystemItem';
-import { FileSystemType, FileType } from '../../../enums';
+import { FileSystemType } from '../../../enums';
+import type { FileType } from '../../../enums';
+import type { CourseFile } from '../../../interfaces';
 
 export const Route = createFileRoute('/course/$courseID/media')({
   component: RouteComponent,
@@ -30,7 +32,6 @@ export const Route = createFileRoute('/course/$courseID/media')({
 
 function RouteComponent() {
   const { filesData } = Route.useLoaderData();
-  console.log(filesData);
 
   return (
     <div className="h-screen overflow-y-scroll">
@@ -88,21 +89,21 @@ function RouteComponent() {
                     No files have been uploaded for this course yet.
                   </p>
                 ) : (
-                  filesData.map((file: any) => (
+                  filesData.map((file: CourseFile) => (
                     <FileSystemItem
                       key={file.id}
                       fileSystemType={FileSystemType.FILE} // ! hardcoded FILE for now
                       fileType={
                         file.displayName
                           .split('.')
-                          .pop()
+                          .pop()!
                           .toUpperCase() as FileType
                       }
                       fileName={file.displayName}
                       fileSizeBytes={
                         Math.round((parseInt(file.size, 10) / 1000) * 10) / 10
                       }
-                      createdAt = {file.createdAt}
+                      createdAt={file.createdAt}
                     />
                   ))
                 )}
