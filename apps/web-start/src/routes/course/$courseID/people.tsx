@@ -1,6 +1,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import UserCard from '../../../components/UserCard';
+import type { CourseMember, UserData } from '../../../interfaces';
 
 export const Route = createFileRoute('/course/$courseID/people')({
   component: RouteComponent,
@@ -20,8 +21,8 @@ function RouteComponent() {
 
   const joinedCourseMembers = [
     { ...courseData?.professor, role: 'Professor' },
-    ...(courseData?.tas.map((ta: any) => ({ ...ta, role: 'TA' })) || []),
-    ...(courseData?.students.map((student: any) => ({
+    ...(courseData?.tas.map((ta: UserData) => ({ ...ta, role: 'TA' })) || []),
+    ...(courseData?.students.map((student: UserData) => ({
       ...student,
       role: 'Student',
     })) || []),
@@ -52,7 +53,7 @@ function RouteComponent() {
       <div className="w-full my-5 grid grid-cols-3 gap-3">
         {isLoading
           ? 'Loading...'
-          : joinedCourseMembers.map((member: any) => (
+          : joinedCourseMembers.map((member: CourseMember) => (
               <Link
                 to={'/$uid/profile'}
                 params={{ uid: member.id }}
