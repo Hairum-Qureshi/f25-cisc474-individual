@@ -12,7 +12,6 @@ import { SubmissionModule } from './submission/submission.module';
 import { AnnouncementModule } from './announcement/announcement.module';
 import { DeadlineModule } from './deadline/deadline.module';
 import { AuthModule } from './auth/auth.module';
-import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
