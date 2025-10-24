@@ -75,6 +75,34 @@ interface AnnouncementProps {
   date: string;
 }
 
+interface CourseGrade {
+  id: string;
+  courseID: string;
+  studentID: string;
+  numericGrade: number;
+  letterGrade: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Assignment {
+  id: string;
+  title: string;
+  description: string;
+  module: string;
+  dueDate: string;
+  courseID: string;
+  graderID: string;
+  totalPoints: number;
+  published: boolean;
+  submissionRequired: boolean;
+  createdAt: string;
+  updatedAt: string;
+  allowEarlyECSubmissionIncentive: boolean;
+  extraCreditTotalPointsIncentive: number;
+  revokedECSubmissionIncentive: boolean;
+}
+
 export type {
   FileSystemItemProps,
   CourseProps,
@@ -82,4 +110,6 @@ export type {
   UserCardProps,
   Announcement,
   AnnouncementProps,
+  CourseGrade,
+  Assignment,
 };
