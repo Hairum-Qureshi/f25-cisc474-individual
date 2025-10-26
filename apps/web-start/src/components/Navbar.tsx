@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { IoSunny } from 'react-icons/io5';
 import { FaMoon } from 'react-icons/fa';
 import { useQuery } from '@tanstack/react-query';
+import { useApiClient } from '../integrations/api';
 
 export default function Navbar() {
   const [lightMode, setLightMode] = useState(true);
@@ -23,18 +24,14 @@ export default function Navbar() {
   const params = currentMatch?.params as { courseID?: string } | undefined;
   const courseID = params?.courseID;
 
+  const { request } = useApiClient();
+
   const { data: courseData } = useQuery({
-    queryKey: [`course ${courseID}`],
-    queryFn: ({ queryKey }) => {
-      const keyString = queryKey[0];
-      const courseId = keyString?.split(' ')[1];
-
-      return fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/courses/${courseId}`,
-      ).then((res) => res.json());
-    },
+    queryKey: ['course', courseID],
+    queryFn: () => request(`/courses/${courseID}`),
+    enabled: !!courseID, // prevent running before ID exists
   });
-
+  
   return (
     <nav className="w-full bg-slate-200 p-4 h-20">
       <div className="flex items-center">

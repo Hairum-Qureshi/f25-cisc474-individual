@@ -11,7 +11,8 @@ export class CourseService {
 
   async getCourseById(id: string) {
     // used ChatGPT to understand how to use Prisma to populate the ID references to get more data
-    return this.prisma.course.findUnique({
+
+    const course = await this.prisma.course.findUnique({
       where: { id },
       include: {
         professor: {
@@ -54,5 +55,7 @@ export class CourseService {
         },
       },
     });
+
+    return course;
   }
 }

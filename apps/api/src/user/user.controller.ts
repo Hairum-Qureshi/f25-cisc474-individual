@@ -14,10 +14,9 @@ import { JwtUser } from 'src/auth/jwt.strategy';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(AuthGuard('jwt'))
   @Get('me')
+  @UseGuards(AuthGuard('jwt'))
   async me(@CurrentUser() auth: JwtUser) {
-    console.log(auth);
     if (!auth || !auth.userId) {
       throw new UnauthorizedException();
     }

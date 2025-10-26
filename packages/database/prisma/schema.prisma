@@ -60,6 +60,18 @@ model User {
   @@index([role])
 }
 
+model Authentication {
+    id         String   @id @default(uuid())
+    userId     String
+    provider   String
+    providerId String
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([provider, providerId])
+}
+
 model Course {
   id            String         @id @default(cuid())
   courseName    String
@@ -189,18 +201,6 @@ model Deadline {
   updatedAt         DateTime @updatedAt
 
   @@index([ownerId])
-}
-
-model Authentication {
-    id         String   @id @default(uuid())
-    userId     String
-    provider   String
-    providerId String
-    createdAt  DateTime @default(now())
-    updatedAt  DateTime @updatedAt
-    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    @@index([provider, providerId])
 }
 
 // I used ChatGPT to help me write the Prisma models based off of the MongoDB schemas I wrote because I have a much better understanding of MongoDB than I do of Prisma at the moment. You can view my MongoDB schemas that I wrote here as proof: https://hypernotepad.com/n/ffee74124382375c
