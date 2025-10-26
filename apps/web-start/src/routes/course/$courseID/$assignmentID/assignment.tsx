@@ -1,55 +1,77 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useQuery } from '@tanstack/react-query';
+import { useApiClient } from '../../../../integrations/api';
+import type { Assignment } from '../../../../interfaces';
 
 export const Route = createFileRoute(
   '/course/$courseID/$assignmentID/assignment',
 )({
-  loader: async (context) => {
-    const assignmentID =
-      (context.params as { assignmentID?: string }).assignmentID ?? '';
-
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/assignments/${assignmentID}/assignment`,
-    );
-
-    if (!response.ok) {
-      console.error(
-        'Assignment data fetch failed',
-        response.status,
-        await response.text(),
-      );
-      throw new Error('Failed to fetch assignment data');
-    }
-
-    const assignmentData = await response.json();
-    return { assignmentData };
-  },
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { assignmentData } = Route.useLoaderData();
+  const { assignmentID } = Route.useParams();
+
+  const { request } = useApiClient();
+  const { isAuthenticated, isLoading: authLoading } = useAuth0();
+
+  const { data: assignmentData = [] } = useQuery({
+    queryKey: [],
+    queryFn: () =>
+      request<Assignment>(`/assignments/${assignmentID}/assignment`),
+  });
+
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <p className="text-lg">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-4">
+            You must be logged in to view course assignments.
+          </h2>
+          <p className="text-sky-700 font-semibold">
+            Click here{' '}
+            <Link to="/" className="underline">
+              here
+            </Link>{' '}
+            to sign in
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50 flex justify-center py-10 px-4">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-blue-50 flex justify-center py-10 px-4">
       <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-8">
         <div className="flex-1 bg-white shadow-sm rounded-xl border border-gray-100 p-8 space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 pb-4">
             <div>
               <h1 className="text-2xl font-semibold text-gray-800">
-                {assignmentData?.title}
+                {(assignmentData as Assignment)?.title}
               </h1>
             </div>
             <div className="mt-4 sm:mt-0 text-right">
               <p className="text-sm text-gray-600">
                 Due:{' '}
                 <span className="font-medium text-gray-800">
-                  {new Date(assignmentData?.dueDate).toLocaleDateString()}
+                  {new Date(
+                    (assignmentData as Assignment)?.dueDate,
+                  ).toLocaleDateString()}
                 </span>
               </p>
               <p className="text-sm text-gray-600">
                 Points:{' '}
                 <span className="font-medium text-gray-800">
-                  {assignmentData?.totalPoints}
+                  {(assignmentData as Assignment)?.totalPoints}
                 </span>
               </p>
             </div>
@@ -59,7 +81,7 @@ function RouteComponent() {
               Assignment Overview
             </h2>
             <p className="text-gray-700 text-sm leading-relaxed">
-              {assignmentData?.description}
+              {(assignmentData as Assignment)?.description}
             </p>
 
             <div className="mt-4 bg-gray-50 border border-gray-100 rounded-lg p-4">
