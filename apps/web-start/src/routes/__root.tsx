@@ -10,6 +10,7 @@ import TanStackQueryDevtools from '../integrations/devtools';
 import appCss from '../styles.css?url';
 import Navbar from '../components/Navbar';
 import type { QueryClient } from '@tanstack/react-query';
+import { useAuth0 } from '@auth0/auth0-react';
 
 export interface MyRouterContext {
   queryClient: QueryClient;
@@ -45,13 +46,14 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuth0();
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body className="flex flex-col">
-        <Navbar />
+        {isAuthenticated && <Navbar />}
         {children}
         <TanStackDevtools
           config={{ position: 'bottom-right' }}
