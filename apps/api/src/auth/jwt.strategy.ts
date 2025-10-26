@@ -60,6 +60,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       include: { user: true },
     });
 
+    // * for clearing Google data from db
+    // await this.prisma.user
+    //   .delete({
+    //     where: { id: 'cmh7vodd30000io58p09i4m49' },
+    //   })
+    //   .then(() => console.log('deleted!'));
+
     // 2) If missing, create User + Authentication (using whatever claims we have)
     if (!auth) {
       const fullName = `${provider}-${providerId}`.slice(0, 191);
@@ -86,8 +93,38 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             },
           },
         },
+        include: {
+          enrolledCourses: true,
+        },
       });
+
+      // const user = await this.prisma.user.upsert({
+      //   where: { email },
+      //   update: {},
+      //   create: {
+      //     fullName,
+      //     email,
+      //     profilePicture:
+      //       'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png',
+      //     role: 'STUDENT',
+      //     enrolledCourses: {
+      //       connect: [{ id: '143124124' }],
+      //     },
+      //     authentications: {
+      //       create: {
+      //         provider,
+      //         providerId,
+      //       },
+      //     },
+      //   },
+      //   include: {
+      //     enrolledCourses: true,
+      //   },
+      // });
+
       auth = { ...auth, user } as any;
+
+      console.log(auth);
     } else {
       // 3) Update user profile fields opportunistically (don’t overwrite with nulls)
       await this.prisma.user.update({

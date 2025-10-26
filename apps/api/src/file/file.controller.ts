@@ -1,7 +1,9 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { FileService } from './file.service';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('files')
+@UseGuards(AuthGuard('jwt'))
 export class FileController {
   constructor(private fileService: FileService) {}
 
