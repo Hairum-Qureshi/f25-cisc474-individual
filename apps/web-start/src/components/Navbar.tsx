@@ -1,7 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useState } from 'react';
-import { IoSunny } from 'react-icons/io5';
-import { FaMoon } from 'react-icons/fa';
+// import { IoSunny } from 'react-icons/io5';
+// import { FaMoon } from 'react-icons/fa';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useApiClient, useCurrentUser } from '../integrations/api';
@@ -37,7 +37,7 @@ export default function Navbar() {
           />
         </div>
         <div className="flex flex-col">
-          <h3 className="font-semibold ml-3 text-lg">
+          <h3 className="font-semibold ml-3 text-base">
             {currUserData?.fullName}
           </h3>
           <h3 className="font-semibold ml-3 text-slate-600 text-sm">
@@ -111,12 +111,12 @@ export default function Navbar() {
               </Link>
             </>
           )}
-          <div
+          {/* <div
             className="mx-4 bg-slate-700 text-yellow-300 w-10 h-10 flex items-center justify-center rounded-full hover:cursor-pointer"
             onClick={() => setLightMode(!lightMode)}
           >
             {lightMode ? <IoSunny className="text-2xl" /> : <FaMoon />}
-          </div>
+          </div> */}
         </div>
       </div>
     </nav>
