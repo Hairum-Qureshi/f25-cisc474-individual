@@ -1,40 +1,80 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import Module from '../../../components/Module';
 import type { Assignment } from '../../../interfaces';
+import { useApiClient } from '../../../integrations/api';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useQuery } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/course/$courseID/assignments')({
   component: RouteComponent,
-  loader: async (context) => {
-    const courseID = (context.params as { courseID?: string }).courseID ?? '';
+  // loader: async (context) => {
+  // const courseID = (context.params as { courseID?: string }).courseID ?? '';
 
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/assignments/${courseID}`,
-    );
+  //   const response = await fetch(
+  //     `${import.meta.env.VITE_BACKEND_URL}/assignments/${courseID}`,
+  //   );
 
-    if (!response.ok) {
-      console.error(
-        'Assignment fetch failed',
-        response.status,
-        await response.text(),
-      );
-      throw new Error('Failed to fetch assignment data');
-    }
+  //   if (!response.ok) {
+  //     console.error(
+  //       'Assignment fetch failed',
+  //       response.status,
+  //       await response.text(),
+  //     );
+  //     throw new Error('Failed to fetch assignment data');
+  //   }
 
-    const assignmentsData = await response.json();
-    return { assignmentsData };
-  },
+  //   const assignmentsData = await response.json();
+  //   return { assignmentsData };
+  // },
 });
 
 function RouteComponent() {
   const [collapseAll, setCollapseAll] = useState(false);
-  const { assignmentsData } = Route.useLoaderData();
+  // const { assignmentsData } = Route.useLoaderData();
+  const { courseID } = Route.useParams();
+
+  const { request } = useApiClient();
+  const { isAuthenticated, isLoading: authLoading } = useAuth0();
+
+  const { data: assignmentsData = [] } = useQuery({
+    queryKey: ['courseGrade', courseID],
+    queryFn: () => request<Assignment>(`/assignments/${courseID}`),
+    enabled: !!courseID,
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCollapseAll(e.target.checked);
   };
 
-  const groupedByModule = assignmentsData.reduce(
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <p className="text-lg">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-4">
+            You must be logged in to view course assignments.
+          </h2>
+          <p className="text-sky-700 font-semibold">
+            Click here{' '}
+            <Link to="/" className="underline">
+              here
+            </Link>{' '}
+            to sign in
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const groupedByModule = (assignmentsData as Assignment[])?.reduce(
     (acc: { [x: string]: Array<Assignment> }, assignment: Assignment) => {
       const key = assignment.module;
       if (!acc[key]) acc[key] = [];
