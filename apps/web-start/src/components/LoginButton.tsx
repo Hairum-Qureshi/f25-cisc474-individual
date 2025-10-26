@@ -8,6 +8,7 @@ const LoginButton = () => {
       onClick={() =>
         loginWithRedirect({
           authorizationParams: {
+            audience: import.meta.env.VITE_AUTH0_AUDIENCE,
             scope: 'read:courses',
             prompt: 'consent',
           },
