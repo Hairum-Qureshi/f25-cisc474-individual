@@ -146,6 +146,16 @@ interface MyRouterContext {
   queryClient: QueryClient;
 }
 
+interface Deadline {
+  id: string;
+  courseTitle: string;
+  courseDescription: string;
+  courseDeadline: string;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type {
   FileSystemItemProps,
   CourseProps,
@@ -162,4 +172,5 @@ export type {
   CourseFile,
   CourseMember,
   MyRouterContext,
+  Deadline,
 };
