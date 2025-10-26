@@ -152,6 +152,7 @@ export type {
   Assignment,
   ModuleProps,
   UserData,
+  EnrolledCourses,
   CourseExtended,
   CourseFile,
   CourseMember,
