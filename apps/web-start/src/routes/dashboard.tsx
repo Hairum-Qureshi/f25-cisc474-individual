@@ -3,16 +3,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 import { useState } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import Course from '../components/Course';
 import Calendar from '../components/Calendar';
+import { useApiClient, useCurrentUser } from '../integrations/api';
 import type { Course as ICourse } from '../interfaces';
 import type {
   DeadlineCreateIn,
   DeadlineOut,
   DeadlineUpdateIn,
 } from '@repo/api/deadlines';
-import { useApiClient, useCurrentUser } from '../integrations/api';
-import { useAuth0 } from '@auth0/auth0-react';
 
 export const Route = createFileRoute('/dashboard')({
   component: RouteComponent,
@@ -287,7 +287,7 @@ function RouteComponent() {
                           courseTitle: courseTitle,
                           courseDescription: courseDescription,
                           courseDeadline: courseDeadline,
-                          ownerId: CURR_UID,
+                          ownerId: CURR_UID!,
                         })
                       }
                     >
