@@ -124,6 +124,7 @@ interface CourseExtended extends Course {
   description: string;
   professor: {
     email: string;
+    fullName: string;
   };
   tas: Array<UserData>;
   students: Array<UserData>;
