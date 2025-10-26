@@ -7,7 +7,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import Course from '../components/Course';
 import Calendar from '../components/Calendar';
 import { useApiClient, useCurrentUser } from '../integrations/api';
-import type { Course as ICourse } from '../interfaces';
+import type { Deadline, Course as ICourse } from '../interfaces';
 import type {
   DeadlineCreateIn,
   DeadlineOut,
@@ -17,8 +17,6 @@ import type {
 export const Route = createFileRoute('/dashboard')({
   component: RouteComponent,
 });
-
-// TODO - create a type for deadlines and replace 'any'
 
 function RouteComponent() {
   const queryClient = useQueryClient();
@@ -199,14 +197,14 @@ function RouteComponent() {
               <div className="space-y-5 mx-3 h-60 overflow-y-auto">
                 {deadlinesLoading ? (
                   <p>Loading deadlines...</p>
-                ) : (deadlines as any)?.length === 0 &&
+                ) : (deadlines as Deadline[])?.length === 0 &&
                   !showForm &&
                   !showEditForm ? (
                   <p>No upcoming deadlines</p>
                 ) : (
                   !showEditForm &&
                   !showForm &&
-                  (deadlines as any[]).map((deadline) => (
+                  (deadlines as Deadline[]).map((deadline) => (
                     <div
                       key={deadline.id}
                       className="bg-white p-3 rounded-md shadow-md flex items-center"
