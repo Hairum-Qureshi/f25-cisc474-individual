@@ -114,6 +114,8 @@ interface UserData {
   id: string;
   fullName: string;
   profilePicture: string;
+  bio: string;
+  enrolledCourses: Array<EnrolledCourses>;
 }
 
 interface CourseMember extends UserData {
