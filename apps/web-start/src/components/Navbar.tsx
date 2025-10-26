@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useApiClient, useCurrentUser } from '../integrations/api';
-import { Course } from '../interfaces';
+import type { Course } from '../interfaces';
 
 export default function Navbar() {
   const [lightMode, setLightMode] = useState(true);
