@@ -31,14 +31,14 @@ function RouteComponent() {
         <p className="text-xs text-slate-500 mt-6">
           By continuing, you agree to our{' '}
           <Link
-            to="#"
+            to="/"
             className="text-sky-600 hover:text-sky-700 underline transition-colors"
           >
             Terms of Service
           </Link>{' '}
           and{' '}
           <Link
-            to="#"
+            to="/"
             className="text-sky-600 hover:text-sky-700 underline transition-colors"
           >
             Privacy Policy
