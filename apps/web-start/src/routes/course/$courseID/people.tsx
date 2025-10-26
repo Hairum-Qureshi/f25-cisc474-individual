@@ -18,8 +18,12 @@ function RouteComponent() {
   const { request } = useApiClient();
   const { isAuthenticated, isLoading: authLoading } = useAuth0();
 
-  const { data: courseData, isLoading } = useQuery({
-    queryKey: ['users', courseID],
+  const {
+    data: courseData,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['course-people', courseID],
     queryFn: () => request<CourseExtended>(`/courses/${courseID}`),
     enabled: !!courseID,
   });
@@ -51,16 +55,33 @@ function RouteComponent() {
     );
   }
 
-  const joinedCourseMembers: CourseMember[] = [
-    ...(courseData?.professor
-      ? [{ ...courseData.professor, role: 'Professor' }]
-      : []),
-    ...(courseData?.tas?.map((ta: UserData) => ({ ...ta, role: 'TA' })) ?? []),
-    ...(courseData?.students?.map((student: UserData) => ({
-      ...student,
-      role: 'Student',
-    })) ?? []),
-  ] as CourseMember[];
+  if (isError || !courseData) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <p className="text-lg text-red-600">
+          Failed to load course members. Please try again later.
+        </p>
+      </div>
+    );
+  }
+
+  const professor = courseData.professor
+    ? [{ ...courseData.professor, role: 'Professor' }]
+    : [];
+  const tas = (courseData.tas ?? []).map((ta: UserData) => ({
+    ...ta,
+    role: 'TA',
+  }));
+  const students = (courseData.students ?? []).map((student: UserData) => ({
+    ...student,
+    role: 'Student',
+  }));
+
+  const joinedCourseMembers: Array<CourseMember> = [
+    ...professor,
+    ...tas,
+    ...students,
+  ] as Array<CourseMember>;
 
   return (
     <div className="h-screen overflow-y-auto text-gray-900 mx-10">
@@ -79,21 +100,28 @@ function RouteComponent() {
           </button>
         </div>
       </div>
-      <div className="w-full my-5 grid grid-cols-3 gap-3">
-        {joinedCourseMembers.map((member) => (
-          <Link
-            to={'/$uid/profile'}
-            params={{ uid: member.id }}
-            key={member.id}
-          >
-            <UserCard
-              name={member.fullName}
-              role={member.role}
-              profilePicture={member.profilePicture}
-            />
-          </Link>
-        ))}
-      </div>
+
+      {joinedCourseMembers.length === 0 ? (
+        <div className="text-center mt-10 text-gray-600">
+          No members have been added to this course yet.
+        </div>
+      ) : (
+        <div className="w-full my-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {joinedCourseMembers.map((member) => (
+            <Link
+              to={'/$uid/profile'}
+              params={{ uid: member.id }}
+              key={member.id}
+            >
+              <UserCard
+                name={member.fullName}
+                role={member.role}
+                profilePicture={member.profilePicture}
+              />
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
