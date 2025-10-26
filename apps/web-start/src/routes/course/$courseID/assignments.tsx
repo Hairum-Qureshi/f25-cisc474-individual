@@ -1,37 +1,17 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import Module from '../../../components/Module';
-import type { Assignment } from '../../../interfaces';
-import { useApiClient } from '../../../integrations/api';
-import { useAuth0 } from '@auth0/auth0-react';
 import { useQuery } from '@tanstack/react-query';
+import { useAuth0 } from '@auth0/auth0-react';
+import Module from '../../../components/Module';
+import { useApiClient } from '../../../integrations/api';
+import type { Assignment } from '../../../interfaces';
 
 export const Route = createFileRoute('/course/$courseID/assignments')({
   component: RouteComponent,
-  // loader: async (context) => {
-  // const courseID = (context.params as { courseID?: string }).courseID ?? '';
-
-  //   const response = await fetch(
-  //     `${import.meta.env.VITE_BACKEND_URL}/assignments/${courseID}`,
-  //   );
-
-  //   if (!response.ok) {
-  //     console.error(
-  //       'Assignment fetch failed',
-  //       response.status,
-  //       await response.text(),
-  //     );
-  //     throw new Error('Failed to fetch assignment data');
-  //   }
-
-  //   const assignmentsData = await response.json();
-  //   return { assignmentsData };
-  // },
 });
 
 function RouteComponent() {
   const [collapseAll, setCollapseAll] = useState(false);
-  // const { assignmentsData } = Route.useLoaderData();
   const { courseID } = Route.useParams();
 
   const { request } = useApiClient();
