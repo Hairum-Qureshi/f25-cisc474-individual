@@ -4,6 +4,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { passportJwtSecret } from 'jwks-rsa';
 import * as dotenv from 'dotenv';
 import { PrismaService } from 'src/prisma.service';
+import randomProfile from 'random-profile-generator';
 
 dotenv.config();
 
@@ -61,8 +62,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     // 2) If missing, create User + Authentication (using whatever claims we have)
     if (!auth) {
+      const fullName = `${provider}-${providerId}`.slice(0, 191);
+      const email = `${provider}_${providerId}@google.com`.slice(0, 191);
       const user = await this.prisma.user.create({
         data: {
+          fullName,
+          email,
+          profilePicture: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
+          role: 'STUDENT',
           authentications: {
             create: {
               provider,
