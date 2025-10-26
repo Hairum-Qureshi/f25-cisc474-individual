@@ -25,9 +25,9 @@ function RouteComponent() {
   const { isAuthenticated, isLoading: authLoading } = useAuth0();
 
   // ✅ Fetch current user — only when authenticated
-  const { data: currUser } = useCurrentUser({
-    enabled: isAuthenticated,
-  });
+  const { data: currUser } = useCurrentUser();
+
+  console.log(currUser);
 
   // 📝 State for deadlines and UI
   const [courseTitle, setCourseTitle] = useState('');
@@ -165,6 +165,13 @@ function RouteComponent() {
           <h2 className="text-2xl font-semibold mb-4">
             You must be logged in to view the dashboard.
           </h2>
+          <p className="text-sky-700 font-semibold">
+            Click here{' '}
+            <Link to="/" className="underline">
+              here
+            </Link>{' '}
+            to sign in
+          </p>
         </div>
       </div>
     );
