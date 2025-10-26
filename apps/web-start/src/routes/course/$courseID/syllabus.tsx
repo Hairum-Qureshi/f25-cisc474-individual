@@ -1,5 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useApiClient } from '../../../integrations/api';
+import type { Course, CourseExtended } from '../../../interfaces';
 
 export const Route = createFileRoute('/course/$courseID/syllabus')({
   component: RouteComponent,
@@ -7,18 +10,41 @@ export const Route = createFileRoute('/course/$courseID/syllabus')({
 
 function RouteComponent() {
   const { courseID } = Route.useParams();
+  const { request } = useApiClient();
+  const { isAuthenticated, isLoading: authLoading } = useAuth0();
 
   const { data: courseData, isLoading } = useQuery({
-    queryKey: [`course ${courseID}`],
-    queryFn: ({ queryKey }) => {
-      const keyString = queryKey[0];
-      const courseId = keyString?.split(' ')[1];
-
-      return fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/courses/${courseId}`,
-      ).then((res) => res.json());
-    },
+    queryKey: [],
+    queryFn: () => request<Course>(`/courses/${courseID}`),
+    enabled: !!courseID,
   });
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-4">
+            You must be logged in to view course syllabus.
+          </h2>
+          <p className="text-sky-700 font-semibold">
+            Click{' '}
+            <Link to="/" className="underline">
+              here
+            </Link>{' '}
+            to sign in
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (authLoading || isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <p className="text-lg">Loading course members…</p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -30,8 +56,8 @@ function RouteComponent() {
                 {isLoading ? 'Loading...' : courseData?.courseName} Syllabus
               </h1>
               <p className="mt-1 text-sm text-gray-600">
-                Instructor: {courseData?.professor.fullName} · Spring 2026 ·
-                Tue/Thu 10:30-11:50 AM · Room 204
+                Instructor: {(courseData as CourseExtended)?.professor.fullName}{' '}
+                · Spring 2026 · Tue/Thu 10:30-11:50 AM · Room 204
               </p>
             </div>
             <div className="flex items-center gap-4">
@@ -48,7 +74,7 @@ function RouteComponent() {
                 <dl className="mt-3 text-sm text-gray-600 space-y-2">
                   <div>
                     <dt className="font-medium">Email</dt>
-                    <dd>{courseData?.professor.email}</dd>
+                    <dd>{(courseData as CourseExtended)?.professor.email}</dd>
                   </div>
                   <div>
                     <dt className="font-medium">Office</dt>
