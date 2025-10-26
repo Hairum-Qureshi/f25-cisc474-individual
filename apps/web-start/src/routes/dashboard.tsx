@@ -11,20 +11,21 @@ import type {
   DeadlineOut,
   DeadlineUpdateIn,
 } from '@repo/api/deadlines';
-import { useCurrentUser } from '../integrations/api';
+import { useApiClient, useCurrentUser } from '../integrations/api';
 import { useAuth0 } from '@auth0/auth0-react';
-
-const CURR_UID = 'cmh3v8sgj0000y0gscplhgko8';
 
 export const Route = createFileRoute('/dashboard')({
   component: RouteComponent,
 });
 
+// TODO - create a type for deadlines and replace 'any'
+
 function RouteComponent() {
   const queryClient = useQueryClient();
-  const { isAuthenticated, isLoading: authLoading } = useAuth0();
+  const { data: currUserData, isLoading: userLoading } = useCurrentUser();
+  const CURR_UID = currUserData?.id;
 
-  const { data: currUser } = useCurrentUser();
+  const { isAuthenticated, isLoading: authLoading } = useAuth0();
 
   const [courseTitle, setCourseTitle] = useState('');
   const [courseDescription, setCourseDescription] = useState('');
@@ -36,37 +37,20 @@ function RouteComponent() {
   const [editDescription, setEditDescription] = useState('');
   const [editDeadline, setEditDeadline] = useState('');
 
-  const { data: deadlines = [], isLoading: deadlinesLoading } = useQuery<
-    Array<DeadlineOut>
-  >({
-    queryKey: ['deadlines'],
-    queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/deadlines`);
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    },
-    enabled: isAuthenticated,
-  });
+  const { request } = useApiClient();
 
-  const { data: currUserData, isLoading: userLoading } = useQuery({
-    queryKey: ['currUserData'],
-    queryFn: () =>
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${CURR_UID}`).then(
-        (res) => res.json(),
-      ),
-    enabled: isAuthenticated, 
+  const { data: deadlines = [], isLoading: deadlinesLoading } = useQuery({
+    queryKey: ['deadlines'],
+    queryFn: () => request('/deadlines'),
   });
 
   const createMutation = useMutation({
-    mutationFn: async (newDeadline: DeadlineCreateIn) => {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/deadlines`, {
+    mutationFn: (newDeadline: DeadlineCreateIn) =>
+      request('/deadlines', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newDeadline),
-      });
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    },
+      }),
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['deadlines'] });
       setShowForm(false);
@@ -74,30 +58,25 @@ function RouteComponent() {
       setCourseDescription('');
       setCourseDeadline('');
     },
+
     onError: (err) => {
       console.error('Failed to create deadline:', err);
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({
+    mutationFn: ({
       id,
       updates,
     }: {
       id: string;
       updates: Partial<DeadlineUpdateIn>;
-    }) => {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/deadlines/${id}`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updates),
-        },
-      );
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    },
+    }) =>
+      request(`/deadlines/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+      }),
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['deadlines'] });
       setEditId(null);
@@ -106,30 +85,26 @@ function RouteComponent() {
       setEditDeadline('');
       setShowEditForm(false);
     },
+
     onError: (err) => {
       console.error('Failed to update deadline:', err);
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/deadlines/${id}`,
-        {
-          method: 'DELETE',
-        },
-      );
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    },
+    mutationFn: (id: string) =>
+      request(`/deadlines/${id}`, {
+        method: 'DELETE',
+      }),
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['deadlines'] });
     },
+
     onError: (err) => {
       console.error('Failed to delete deadline:', err);
     },
   });
-
   const handleEdit = (deadline: DeadlineOut) => {
     setEditId(deadline.id);
     setEditTitle(deadline.courseTitle);
@@ -224,12 +199,14 @@ function RouteComponent() {
               <div className="space-y-5 mx-3 h-60 overflow-y-auto">
                 {deadlinesLoading ? (
                   <p>Loading deadlines...</p>
-                ) : deadlines.length === 0 && !showForm && !showEditForm ? (
+                ) : (deadlines as any)?.length === 0 &&
+                  !showForm &&
+                  !showEditForm ? (
                   <p>No upcoming deadlines</p>
                 ) : (
                   !showEditForm &&
                   !showForm &&
-                  deadlines.map((deadline) => (
+                  (deadlines as any[]).map((deadline) => (
                     <div
                       key={deadline.id}
                       className="bg-white p-3 rounded-md shadow-md flex items-center"
@@ -373,7 +350,7 @@ function RouteComponent() {
                         Cancel
                       </button>
                       <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md"
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 hover:cursor-pointer rounded-md"
                         onClick={() =>
                           updateMutation.mutate({
                             id: editId,
