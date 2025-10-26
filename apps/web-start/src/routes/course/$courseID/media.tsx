@@ -1,37 +1,56 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { FaMagnifyingGlass } from 'react-icons/fa6';
 import { IoFilter } from 'react-icons/io5';
 // import VideoLecture from '../../../components/VideoLecture';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useQuery } from '@tanstack/react-query';
 import FileSystemItem from '../../../components/FileSystemItem';
 import { FileSystemType } from '../../../enums';
+import { useApiClient } from '../../../integrations/api';
 import type { FileType } from '../../../enums';
 import type { CourseFile } from '../../../interfaces';
 
 export const Route = createFileRoute('/course/$courseID/media')({
   component: RouteComponent,
-  loader: async (context) => {
-    const courseID = (context.params as { courseID?: string }).courseID ?? '';
-
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/files/${courseID}`,
-    );
-
-    if (!response.ok) {
-      console.error(
-        'Files fetch failed',
-        response.status,
-        await response.text(),
-      );
-      throw new Error('Failed to fetch files data');
-    }
-
-    const filesData = await response.json();
-    return { filesData };
-  },
 });
 
 function RouteComponent() {
-  const { filesData } = Route.useLoaderData();
+  const { courseID } = Route.useParams();
+  const { request } = useApiClient();
+  const { isAuthenticated, isLoading: authLoading } = useAuth0();
+
+  const { data: filesData, isLoading } = useQuery({
+    queryKey: [],
+    queryFn: () => request<Array<CourseFile>>(`/files/${courseID}`),
+    enabled: !!courseID,
+  });
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-4">
+            You must be logged in to view course files and media.
+          </h2>
+          <p className="text-sky-700 font-semibold">
+            Click{' '}
+            <Link to="/" className="underline">
+              here
+            </Link>{' '}
+            to sign in
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (authLoading || isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <p className="text-lg">Loading course media...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen overflow-y-scroll">
@@ -84,12 +103,12 @@ function RouteComponent() {
                 </div>
               </div>
               <div className="space-y-5 mx-3 my-4 h-screen overflow-y-auto">
-                {filesData.length === 0 ? (
+                {(filesData as Array<CourseFile>).length === 0 ? (
                   <p className="text-center">
                     No files have been uploaded for this course yet.
                   </p>
                 ) : (
-                  filesData.map((file: CourseFile) => (
+                  (filesData as Array<CourseFile>)?.map((file: CourseFile) => (
                     <FileSystemItem
                       key={file.id}
                       fileSystemType={FileSystemType.FILE} // ! hardcoded FILE for now
