@@ -31,6 +31,7 @@ export class UserController {
       email: user.email,
       bio: user.bio,
       profilePicture: user.profilePicture,
+      enrolledCourses: user.enrolledCourses,
     };
   }
 
