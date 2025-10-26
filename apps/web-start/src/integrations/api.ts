@@ -131,8 +131,9 @@ export function useApiMutation<Input extends Json, Output = unknown>(opts?: {
 
 export type CurrentUser = {
   id: string;
-  name?: string | null;
+  fullName?: string | null;
   email?: string | null;
+  profilePicture: string | null;
 };
 
 export function useCurrentUser(opts?: { scope?: string }) {
