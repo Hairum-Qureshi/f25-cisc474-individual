@@ -11,6 +11,7 @@ import { PrismaService } from './prisma.service';
 import { SubmissionModule } from './submission/submission.module';
 import { AnnouncementModule } from './announcement/announcement.module';
 import { DeadlineModule } from './deadline/deadline.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { DeadlineModule } from './deadline/deadline.module';
     AssignmentModule,
     AnnouncementModule,
     DeadlineModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

@@ -32,7 +32,9 @@
   },
   "dependencies": {
     "@faker-js/faker": "^10.0.0",
-    "@prisma/client": "latest"
+    "@prisma/client": "latest",
+    "@rolldown/pluginutils": "^1.0.0-beta.40",
+    "@vitejs/plugin-react": "^5.0.3"
   },
   "packageManager": "npm@10.9.0",
   "workspaces": [

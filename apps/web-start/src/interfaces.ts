@@ -1,3 +1,4 @@
+import type { QueryClient } from '@tanstack/react-query';
 import type { FileSystemType, FileType } from './enums';
 
 interface FileSystemItemProps {
@@ -113,6 +114,8 @@ interface UserData {
   id: string;
   fullName: string;
   profilePicture: string;
+  bio: string;
+  enrolledCourses: Array<EnrolledCourses>;
 }
 
 interface CourseMember extends UserData {
@@ -123,6 +126,7 @@ interface CourseExtended extends Course {
   description: string;
   professor: {
     email: string;
+    fullName: string;
   };
   tas: Array<UserData>;
   students: Array<UserData>;
@@ -141,6 +145,20 @@ interface CourseFile {
   updatedAt: string;
 }
 
+interface MyRouterContext {
+  queryClient: QueryClient;
+}
+
+interface Deadline {
+  id: string;
+  courseTitle: string;
+  courseDescription: string;
+  courseDeadline: string;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type {
   FileSystemItemProps,
   CourseProps,
@@ -152,7 +170,10 @@ export type {
   Assignment,
   ModuleProps,
   UserData,
+  EnrolledCourses,
   CourseExtended,
   CourseFile,
   CourseMember,
+  MyRouterContext,
+  Deadline,
 };

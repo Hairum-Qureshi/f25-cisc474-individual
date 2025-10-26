@@ -6,9 +6,10 @@ import { DeadlineCreateIn, DeadlineUpdateIn } from '@repo/api/deadlines';
 export class DeadlineService {
   constructor(private prisma: PrismaService) {}
 
-  async getAll() {
+  async getAll(userID: string) {
     const deadlines = await this.prisma.deadline.findMany({
       orderBy: { courseDeadline: 'asc' },
+      where: { ownerId: userID },
     });
     return deadlines;
   }

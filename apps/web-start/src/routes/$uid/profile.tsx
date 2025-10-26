@@ -1,42 +1,78 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
 import { FaEdit, FaRegUserCircle } from 'react-icons/fa';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth0 } from '@auth0/auth0-react';
 import Course from '../../components/Course';
-import type { Course as ICourse } from '../../interfaces';
+import { useApiClient } from '../../integrations/api';
+import type { Course as ICourse, UserData } from '../../interfaces';
 
 export const Route = createFileRoute('/$uid/profile')({
   component: RouteComponent,
-  loader: async (context) => {
-    const userID = (context.params as { uid?: string }).uid ?? '';
-
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/users/${userID}`,
-    );
-
-    if (!response.ok) {
-      console.error(
-        'User data fetch failed',
-        response.status,
-        await response.text(),
-      );
-      throw new Error('Failed to fetch user data');
-    }
-
-    const userData = await response.json();
-    return { userData };
-  },
 });
 
 function RouteComponent() {
-  const { userData } = Route.useLoaderData();
+  const { uid } = Route.useParams();
+  const { request } = useApiClient();
+  const { isAuthenticated, isLoading: authLoading } = useAuth0();
+
+  const {
+    data: userData,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['user', uid],
+    queryFn: () => request<UserData>(`/users/${uid}`),
+    enabled: !!uid,
+  });
+
+  if (authLoading || isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <p className="text-lg">Loading user profile…</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-4">
+            You must be logged in to view user profiles.
+          </h2>
+          <p className="text-sky-700 font-semibold">
+            Click{' '}
+            <Link to="/" className="underline">
+              here
+            </Link>{' '}
+            to sign in
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !userData) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <p className="text-lg text-red-600">
+          Failed to load user profile. Please try again later.
+        </p>
+      </div>
+    );
+  }
+
+  const { fullName, id, bio, profilePicture, enrolledCourses = [] } = userData;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50 flex justify-center py-10">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-blue-50 flex justify-center py-10">
       <div className="w-full max-w-5xl grid grid-cols-3 gap-6">
+        {/* Left Section */}
         <div className="col-span-2 flex flex-col gap-6">
           <div className="bg-white shadow-sm rounded-xl p-6 flex items-center gap-4 border border-gray-100">
             <img
               src={
-                userData?.profilePicture ||
+                profilePicture ||
                 'https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg'
               }
               alt="Profile picture"
@@ -44,19 +80,17 @@ function RouteComponent() {
             />
             <div>
               <h2 className="text-3xl font-semibold text-gray-800">
-                {userData?.fullName}
+                {fullName}
               </h2>
-              <p className="text-sm text-gray-500">ID: {userData?.id}</p>
+              <p className="text-sm text-gray-500">ID: {id}</p>
             </div>
           </div>
           <div className="bg-white shadow-sm rounded-xl p-6 border border-gray-100">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              {userData?.fullName}'s Bio:
+              {fullName}'s Bio:
             </h3>
             <div className="space-y-4">
-              <p className="text-slate-500">
-                {userData.bio || 'No bio written'}
-              </p>
+              <p className="text-slate-500">{bio || 'No bio written'}</p>
             </div>
           </div>
         </div>
@@ -86,17 +120,19 @@ function RouteComponent() {
                 Courses Taking:
               </h3>
               <div className="space-y-5 mx-3 my-4">
-                {userData?.enrolledCourses.length ? (
-                  userData.enrolledCourses?.map((course: ICourse) => (
+                {enrolledCourses.length > 0 ? (
+                  enrolledCourses.map((course: ICourse) => (
                     <Course
                       key={course.id}
                       courseName={course.courseName}
-                      courseTimings={''}
-                      professorName={''}
+                      courseTimings=""
+                      professorName=""
                     />
                   ))
                 ) : (
-                  <p className="mx-3">No courses enrolled</p>
+                  <p className="mx-3 text-gray-500 italic">
+                    No courses enrolled
+                  </p>
                 )}
               </div>
             </div>

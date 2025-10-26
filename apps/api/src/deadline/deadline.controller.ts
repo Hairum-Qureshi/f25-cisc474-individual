@@ -6,17 +6,22 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { DeadlineService } from './deadline.service';
 import { DeadlineCreateIn, DeadlineUpdateIn } from '@repo/api/deadlines';
+import { AuthGuard } from '@nestjs/passport';
+import { CurrentUser } from 'src/auth/current-user-decorator';
+import { JwtUser } from 'src/auth/jwt.strategy';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('deadlines')
 export class DeadlineController {
   constructor(private readonly deadlineService: DeadlineService) {}
 
   @Get()
-  async getAllDeadlines() {
-    return this.deadlineService.getAll();
+  async getAllDeadlines(@CurrentUser() auth: JwtUser) {
+    return this.deadlineService.getAll(auth.userId);
   }
 
   @Get(':id')
@@ -29,7 +34,7 @@ export class DeadlineController {
     return this.deadlineService.create(createCourseDto);
   }
 
-  @Patch(":id")
+  @Patch(':id')
   async updateDeadline(
     @Param('id') id: string,
     @Body() updateDeadlineDto: DeadlineUpdateIn,

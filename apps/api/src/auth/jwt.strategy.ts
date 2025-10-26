@@ -1,0 +1,144 @@
+import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { passportJwtSecret } from 'jwks-rsa';
+import * as dotenv from 'dotenv';
+import { PrismaService } from 'src/prisma.service';
+import randomProfile from 'random-profile-generator';
+
+dotenv.config();
+
+type JwtPayload = {
+  sub: string; // e.g. "auth0|abc123" or "google-oauth2|xyz"
+  iss: string;
+  aud: string | string[];
+  scope?: string;
+};
+
+export interface JwtUser {
+  userId: string;
+  provider: string;
+  providerId: string;
+  sub: string;
+  scopes: string[];
+}
+
+function splitSub(sub: string) {
+  // "provider|id" → { provider, providerId }
+  const [provider, ...rest] = sub.split('|');
+  return { provider, providerId: rest.join('|') };
+}
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor(private readonly prisma: PrismaService) {
+    super({
+      secretOrKeyProvider: passportJwtSecret({
+        cache: true,
+        rateLimit: true,
+        jwksRequestsPerMinute: 5,
+        jwksUri: `${process.env.AUTH0_ISSUER_URL}.well-known/jwks.json`,
+      }),
+
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      audience: process.env.AUTH0_AUDIENCE,
+      issuer: `${process.env.AUTH0_ISSUER_URL}`,
+      algorithms: ['RS256'],
+    });
+  }
+
+  async validate(payload: JwtPayload): Promise<JwtUser> {
+    // You can see the JWT here
+    // console.log('JWT payload', payload);
+
+    const { sub } = payload;
+    const { provider, providerId } = splitSub(sub);
+
+    // 1) Find Authentication by provider+providerId
+    let auth = await this.prisma.authentication.findFirst({
+      where: { provider, providerId },
+      include: { user: true },
+    });
+
+    // * for clearing Google data from db
+    // await this.prisma.user
+    //   .delete({
+    //     where: { id: 'cmh7vodd30000io58p09i4m49' },
+    //   })
+    //   .then(() => console.log('deleted!'));
+
+    // 2) If missing, create User + Authentication (using whatever claims we have)
+    if (!auth) {
+      const fullName = `${provider}-${providerId}`.slice(0, 191);
+      const email = `${provider}_${providerId}@gmail.com`.slice(0, 191);
+      const user = await this.prisma.user.create({
+        data: {
+          fullName,
+          email,
+          profilePicture:
+            'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png',
+          role: 'STUDENT',
+          enrolledCourses: {
+            connect: [
+              { id: 'cmh3v8t7u000yy0gsnfrh92sb' },
+              {
+                id: 'cmh3v8tmr0010y0gs15bcbupe',
+              },
+            ],
+          },
+          authentications: {
+            create: {
+              provider,
+              providerId,
+            },
+          },
+        },
+        include: {
+          enrolledCourses: true,
+        },
+      });
+
+      // const user = await this.prisma.user.upsert({
+      //   where: { email },
+      //   update: {},
+      //   create: {
+      //     fullName,
+      //     email,
+      //     profilePicture:
+      //       'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png',
+      //     role: 'STUDENT',
+      //     enrolledCourses: {
+      //       connect: [{ id: '143124124' }],
+      //     },
+      //     authentications: {
+      //       create: {
+      //         provider,
+      //         providerId,
+      //       },
+      //     },
+      //   },
+      //   include: {
+      //     enrolledCourses: true,
+      //   },
+      // });
+
+      auth = { ...auth, user } as any;
+
+      console.log(auth);
+    } else {
+      // 3) Update user profile fields opportunistically (don’t overwrite with nulls)
+      await this.prisma.user.update({
+        where: { id: auth.userId },
+        data: {},
+      });
+    }
+
+    return {
+      userId: auth.userId,
+      provider,
+      providerId,
+      sub,
+      scopes: (payload.scope ?? '').split(' ').filter(Boolean),
+    } as JwtUser;
+  }
+}

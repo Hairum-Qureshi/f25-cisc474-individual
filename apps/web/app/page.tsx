@@ -1,9 +1,6 @@
 import Link from 'next/link';
 import Course from '../components/Course';
 
-// TODO - add course details on the click me divs
-// TODO - for mobile view, have the all courses div have a rounded div border whereas the desktop view just as the top right and left corners rounded
-
 export default function Dashboard() {
   return (
     <div className="flex h-screen overflow-hidden">

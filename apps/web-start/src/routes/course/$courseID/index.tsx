@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import Assignment from '../../../components/Assignment';
 import Announcement from '../../../components/Announcement';
 import type { Announcement as IAnnouncement } from '../../../interfaces';
+import { useApiClient } from '../../../integrations/api';
 
 export const Route = createFileRoute('/course/$courseID/')({
   component: CourseOverviewPage,
@@ -10,17 +11,12 @@ export const Route = createFileRoute('/course/$courseID/')({
 
 function CourseOverviewPage() {
   const { courseID } = Route.useParams();
+  const { request } = useApiClient();
 
   const { data: courseData, isLoading } = useQuery({
-    queryKey: [`course ${courseID}`],
-    queryFn: ({ queryKey }) => {
-      const keyString = queryKey[0];
-      const courseId = keyString?.split(' ')[1];
-
-      return fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/courses/${courseId}`,
-      ).then((res) => res.json());
-    },
+    queryKey: ['course', courseID],
+    queryFn: () => request(`/courses/${courseID}`),
+    enabled: !!courseID, // prevent running before ID exists
   });
 
   return (

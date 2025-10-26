@@ -3,16 +3,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
 import { useState } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import Course from '../components/Course';
 import Calendar from '../components/Calendar';
-import type { Course as ICourse } from '../interfaces';
+import { useApiClient, useCurrentUser } from '../integrations/api';
+import type { Deadline, Course as ICourse } from '../interfaces';
 import type {
   DeadlineCreateIn,
   DeadlineOut,
   DeadlineUpdateIn,
 } from '@repo/api/deadlines';
-
-const CURR_UID = 'cmh3v8sgj0000y0gscplhgko8';
 
 export const Route = createFileRoute('/dashboard')({
   component: RouteComponent,
@@ -20,47 +20,35 @@ export const Route = createFileRoute('/dashboard')({
 
 function RouteComponent() {
   const queryClient = useQueryClient();
+  const { data: currUserData, isLoading: userLoading } = useCurrentUser();
+  const CURR_UID = currUserData?.id;
+
+  const { isAuthenticated, isLoading: authLoading } = useAuth0();
 
   const [courseTitle, setCourseTitle] = useState('');
   const [courseDescription, setCourseDescription] = useState('');
   const [courseDeadline, setCourseDeadline] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
-
   const [editId, setEditId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [editDeadline, setEditDeadline] = useState('');
 
-  const { data: deadlines = [], isLoading: deadlinesLoading } = useQuery<
-    Array<DeadlineOut>
-  >({
-    queryKey: ['deadlines'],
-    queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/deadlines`);
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    },
-  });
+  const { request } = useApiClient();
 
-  const { data: currUserData, isLoading: userLoading } = useQuery({
-    queryKey: ['currUserData'],
-    queryFn: () =>
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${CURR_UID}`).then(
-        (res) => res.json(),
-      ),
+  const { data: deadlines = [], isLoading: deadlinesLoading } = useQuery({
+    queryKey: ['deadlines'],
+    queryFn: () => request('/deadlines'),
   });
 
   const createMutation = useMutation({
-    mutationFn: async (newDeadline: DeadlineCreateIn) => {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/deadlines`, {
+    mutationFn: (newDeadline: DeadlineCreateIn) =>
+      request('/deadlines', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newDeadline),
-      });
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    },
+      }),
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['deadlines'] });
       setShowForm(false);
@@ -68,30 +56,25 @@ function RouteComponent() {
       setCourseDescription('');
       setCourseDeadline('');
     },
+
     onError: (err) => {
       console.error('Failed to create deadline:', err);
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({
+    mutationFn: ({
       id,
       updates,
     }: {
       id: string;
       updates: Partial<DeadlineUpdateIn>;
-    }) => {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/deadlines/${id}`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updates),
-        },
-      );
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    },
+    }) =>
+      request(`/deadlines/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+      }),
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['deadlines'] });
       setEditId(null);
@@ -100,30 +83,26 @@ function RouteComponent() {
       setEditDeadline('');
       setShowEditForm(false);
     },
+
     onError: (err) => {
       console.error('Failed to update deadline:', err);
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/deadlines/${id}`,
-        {
-          method: 'DELETE',
-        },
-      );
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    },
+    mutationFn: (id: string) =>
+      request(`/deadlines/${id}`, {
+        method: 'DELETE',
+      }),
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['deadlines'] });
     },
+
     onError: (err) => {
       console.error('Failed to delete deadline:', err);
     },
   });
-
   const handleEdit = (deadline: DeadlineOut) => {
     setEditId(deadline.id);
     setEditTitle(deadline.courseTitle);
@@ -132,9 +111,37 @@ function RouteComponent() {
     setShowEditForm(true);
   };
 
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <p className="text-lg">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-4">
+            You must be logged in to view the dashboard.
+          </h2>
+          <p className="text-sky-700 font-semibold">
+            Click here{' '}
+            <Link to="/" className="underline">
+              here
+            </Link>{' '}
+            to sign in
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-slate-300 min-h-screen h-auto">
       <div className="flex-1 p-3 flex space-x-4">
+        {/* Left Panel - Courses */}
         <div className="w-1/2 flex-5 rounded-md bg-slate-200">
           <div className="flex items-center">
             <h2 className="text-2xl font-semibold mt-5 mx-5">My Courses</h2>
@@ -160,6 +167,7 @@ function RouteComponent() {
             )}
           </div>
         </div>
+
         <div className="w-1/2 rounded-md bg-slate-200">
           <div className="flex">
             <div className="w-1/2 overflow-y-scroll">
@@ -185,15 +193,18 @@ function RouteComponent() {
                   </button>
                 )}
               </div>
+
               <div className="space-y-5 mx-3 h-60 overflow-y-auto">
                 {deadlinesLoading ? (
                   <p>Loading deadlines...</p>
-                ) : deadlines.length === 0 && !showForm && !showEditForm ? (
+                ) : (deadlines as Deadline[])?.length === 0 &&
+                  !showForm &&
+                  !showEditForm ? (
                   <p>No upcoming deadlines</p>
                 ) : (
                   !showEditForm &&
                   !showForm &&
-                  deadlines.map((deadline) => (
+                  (deadlines as Deadline[]).map((deadline) => (
                     <div
                       key={deadline.id}
                       className="bg-white p-3 rounded-md shadow-md flex items-center"
@@ -228,6 +239,7 @@ function RouteComponent() {
                     </div>
                   ))
                 )}
+
                 {showForm && (
                   <div className="bg-white p-3 rounded-md shadow-md">
                     <div className="mb-3">
@@ -273,7 +285,7 @@ function RouteComponent() {
                           courseTitle: courseTitle,
                           courseDescription: courseDescription,
                           courseDeadline: courseDeadline,
-                          ownerId: CURR_UID,
+                          ownerId: CURR_UID!,
                         })
                       }
                     >
@@ -281,6 +293,7 @@ function RouteComponent() {
                     </button>
                   </div>
                 )}
+
                 {editId && showEditForm && (
                   <div className="bg-white p-3 rounded-md shadow-md border border-blue-500">
                     <h3 className="text-lg font-semibold mb-2">
@@ -335,7 +348,7 @@ function RouteComponent() {
                         Cancel
                       </button>
                       <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md"
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 hover:cursor-pointer rounded-md"
                         onClick={() =>
                           updateMutation.mutate({
                             id: editId,
@@ -377,3 +390,5 @@ function RouteComponent() {
 }
 
 export default RouteComponent;
+
+// Code tweaked by ChatGPT

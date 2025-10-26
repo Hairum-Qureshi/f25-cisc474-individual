@@ -1,38 +1,29 @@
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useState } from 'react';
-import { IoSunny } from 'react-icons/io5';
-import { FaMoon } from 'react-icons/fa';
+// import { IoSunny } from 'react-icons/io5';
+// import { FaMoon } from 'react-icons/fa';
 import { useQuery } from '@tanstack/react-query';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useApiClient, useCurrentUser } from '../integrations/api';
+import type { Course } from '../interfaces';
 
 export default function Navbar() {
   const [lightMode, setLightMode] = useState(true);
-
-  const CURR_UID = 'cmh3v8sgj0000y0gscplhgko8';
-
-  const { data: currUserData } = useQuery({
-    queryKey: ['currUserData'],
-    queryFn: () => {
-      return fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/users/${CURR_UID}`,
-      ).then((res) => res.json());
-    },
-  });
+  const { data: currUserData } = useCurrentUser();
+  const CURR_UID = currUserData?.id;
 
   const routerState = useRouterState();
   const currentMatch = routerState.matches.at(-1);
   const params = currentMatch?.params as { courseID?: string } | undefined;
   const courseID = params?.courseID;
 
-  const { data: courseData } = useQuery({
-    queryKey: [`course ${courseID}`],
-    queryFn: ({ queryKey }) => {
-      const keyString = queryKey[0];
-      const courseId = keyString?.split(' ')[1];
+  const { request } = useApiClient();
+  const { logout } = useAuth0();
 
-      return fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/courses/${courseId}`,
-      ).then((res) => res.json());
-    },
+  const { data: courseData } = useQuery({
+    queryKey: ['course', courseID],
+    queryFn: () => request(`/courses/${courseID}`),
+    enabled: !!courseID, // prevent running before ID exists
   });
 
   return (
@@ -40,13 +31,13 @@ export default function Navbar() {
       <div className="flex items-center">
         <div className="w-12 h-12 rounded-lg border-2 border-slate-400">
           <img
-            src={currUserData?.profilePicture}
+            src={currUserData?.profilePicture || ''}
             alt="User profile picture"
             className="w-full h-full rounded-md object-cover"
           />
         </div>
         <div className="flex flex-col">
-          <h3 className="font-semibold ml-3 text-lg">
+          <h3 className="font-semibold ml-3 text-base">
             {currUserData?.fullName}
           </h3>
           <h3 className="font-semibold ml-3 text-slate-600 text-sm">
@@ -54,23 +45,31 @@ export default function Navbar() {
           </h3>
         </div>
         <div className="ml-auto flex items-center space-x-5">
+          <p
+            className="font-semibold text-sky-700 hover:cursor-pointer"
+            onClick={() =>
+              logout({ logoutParams: { returnTo: window.location.origin } })
+            }
+          >
+            Logout
+          </p>
           <Link to="/dashboard" className="font-semibold text-sky-700">
             Dashboard
           </Link>
           <Link
             to="/$uid/profile"
-            params={{ uid: CURR_UID }}
+            params={{ uid: CURR_UID! }}
             className="font-semibold text-sky-700"
           >
             Profile
           </Link>
-          {courseData?.courseName && courseID && (
+          {(courseData as Course)?.courseName && courseID && (
             <Link
               to="/course/$courseID"
               params={{ courseID }}
               className="font-semibold text-sky-700"
             >
-              {courseData?.courseName}
+              {(courseData as Course)?.courseName}
             </Link>
           )}
           {courseID && (
@@ -112,12 +111,12 @@ export default function Navbar() {
               </Link>
             </>
           )}
-          <div
+          {/* <div
             className="mx-4 bg-slate-700 text-yellow-300 w-10 h-10 flex items-center justify-center rounded-full hover:cursor-pointer"
             onClick={() => setLightMode(!lightMode)}
           >
             {lightMode ? <IoSunny className="text-2xl" /> : <FaMoon />}
-          </div>
+          </div> */}
         </div>
       </div>
     </nav>
