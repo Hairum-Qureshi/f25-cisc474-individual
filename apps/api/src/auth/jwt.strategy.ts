@@ -63,13 +63,22 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // 2) If missing, create User + Authentication (using whatever claims we have)
     if (!auth) {
       const fullName = `${provider}-${providerId}`.slice(0, 191);
-      const email = `${provider}_${providerId}@google.com`.slice(0, 191);
+      const email = `${provider}_${providerId}@gmail.com`.slice(0, 191);
       const user = await this.prisma.user.create({
         data: {
           fullName,
           email,
-          profilePicture: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png",
+          profilePicture:
+            'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png',
           role: 'STUDENT',
+          enrolledCourses: {
+            connect: [
+              { id: 'cmh3v8t7u000yy0gsnfrh92sb' },
+              {
+                id: 'cmh3v8tmr0010y0gs15bcbupe',
+              },
+            ],
+          },
           authentications: {
             create: {
               provider,
