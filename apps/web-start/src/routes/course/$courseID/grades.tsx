@@ -1,66 +1,91 @@
-import { Link, createFileRoute, useLoaderData } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useApiClient } from '../../../integrations/api';
 import type { Assignment, CourseGrade } from '../../../interfaces';
 
 export const Route = createFileRoute('/course/$courseID/grades')({
   component: RouteComponent,
-  loader: async ({ params }) => {
-    const courseID = (params as { courseID?: string }).courseID ?? '';
-
-    const [courseGradeRes, assignmentRes] = await Promise.all([
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/course-grades/${courseID}`), // ! this doesn't get the course grade for the current user, only for the current course
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/assignments/${courseID}`),
-    ]);
-
-    let courseGradeData: CourseGrade | null = null;
-
-    if (courseGradeRes.ok) {
-      try {
-        courseGradeData = await courseGradeRes.json();
-      } catch {
-        courseGradeData = null;
-      }
-    } else {
-      courseGradeData = null;
-    }
-
-    const assignmentsData = await assignmentRes.json();
-
-    return { courseGradeData, assignmentsData };
-  },
 });
-
-// TODO - add a search bar
 
 function RouteComponent() {
   const { courseID } = Route.useParams();
-  const { courseGradeData, assignmentsData } = useLoaderData({
-    from: '/course/$courseID/grades',
+  const { request } = useApiClient();
+  const { isAuthenticated, isLoading: authLoading } = useAuth0();
+
+  const { data: courseGradeRes, isLoading: courseGradeLoading } = useQuery({
+    queryKey: ['courseGrade', courseID],
+    queryFn: () => request<CourseGrade>(`/course-grades/${courseID}`),
+    enabled: !!courseID,
   });
 
+  const { data: assignmentRes = [], isLoading: assignmentsLoading } = useQuery({
+    queryKey: ['assignments', courseID],
+    queryFn: () => request<Assignment[]>(`/assignments/${courseID}`),
+    enabled: !!courseID,
+  });
+
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <p className="text-lg">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-4">
+            You must be logged in to view your grades.
+          </h2>
+          <p className="text-sky-700 font-semibold">
+            Click here{' '}
+            <Link to="/" className="underline">
+              here
+            </Link>{' '}
+            to sign in
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (courseGradeLoading || assignmentsLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen text-gray-700">
+        <p>Loading course data…</p>
+      </div>
+    );
+  }
   return (
-    <div className="h-screen overflow-y-auto text-gray-900">
-      <div className="mx-20 py-5">
-        <div className="flex">
-          <div className="sm:mt-0 ml-auto text-right">
+    <div className="h-screen overflow-y-auto text-gray-900 bg-slate-100">
+      <div className="mx-20 py-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-semibold text-slate-800">
+            Grades Overview
+          </h2>
+          <div className="text-right">
             <h1
               className={`text-6xl font-bold ${
-                courseGradeData ? 'text-green-600' : 'text-gray-400'
+                courseGradeRes ? 'text-green-600' : 'text-gray-400'
               }`}
             >
-              {courseGradeData?.numericGrade != null
-                ? `${courseGradeData.numericGrade}%`
+              {courseGradeRes?.numericGrade != null
+                ? `${courseGradeRes.numericGrade}%`
                 : 'N/A'}
             </h1>
             <p className="text-gray-500 text-sm">
-              {courseGradeData ? 'Current Grade' : 'Grade not available'}
+              {courseGradeRes ? 'Current Grade' : 'Grade not available'}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="mx-20 rounded-md border border-slate-300 h-screen overflow-auto">
+      <div className="mx-20 rounded-md border border-slate-300 bg-white overflow-auto shadow-sm">
         <table className="w-full text-left text-gray-700 align-top">
-          <thead className="bg-slate-200 text-gray-500 text-sm uppercase tracking-wide sticky top-0 z-10">
+          <thead className="bg-slate-200 text-gray-600 text-sm uppercase tracking-wide sticky top-0 z-10">
             <tr>
               <th className="px-4 py-3.5 font-medium">#</th>
               <th className="px-4 py-3.5 font-medium">Assignment</th>
@@ -69,37 +94,46 @@ function RouteComponent() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 align-top">
-            {assignmentsData?.map((assignment: Assignment, index: number) => (
-              <tr
-                key={assignment.id}
-                className="hover:bg-gray-50 bg-slate-100 transition-colors text-base align-top"
-              >
-                <td className="px-4 py-3 text-gray-500 align-top">
-                  {index + 1}
-                </td>
+            {assignmentRes.length ? (
+              assignmentRes.map((assignment, index) => (
+                <tr
+                  key={assignment.id}
+                  className="hover:bg-gray-50 transition-colors text-base"
+                >
+                  <td className="px-4 py-3 text-gray-500">{index + 1}</td>
 
-                <td className="px-4 py-3 align-top">
-                  <Link
-                    to="/course/$courseID/$assignmentID/assignment"
-                    params={{ courseID, assignmentID: assignment.id }}
-                    className="font-medium text-blue-600 hover:underline"
-                  >
-                    {assignment.title}
-                  </Link>
-                </td>
+                  <td className="px-4 py-3">
+                    <Link
+                      to="/course/$courseID/$assignmentID/assignment"
+                      params={{ courseID, assignmentID: assignment.id }}
+                      className="font-medium text-blue-600 hover:underline"
+                    >
+                      {assignment.title}
+                    </Link>
+                  </td>
 
-                <td className="px-4 py-3 text-gray-500 align-top">
-                  {assignment.module}
-                </td>
+                  <td className="px-4 py-3 text-gray-500">
+                    {assignment.module || 'N/A'}
+                  </td>
 
-                <td className="px-4 py-3 text-right align-top">
-                  <span className="font-semibold">
-                    {Math.floor(Math.random() * assignment.totalPoints)}/
-                    {assignment.totalPoints}
-                  </span>
+                  <td className="px-4 py-3 text-right">
+                    <span className="font-semibold text-slate-800">
+                      {Math.floor(Math.random() * assignment.totalPoints)}/
+                      {assignment.totalPoints}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan={4}
+                  className="text-center py-6 text-gray-500 text-sm italic"
+                >
+                  No assignments found for this course.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
