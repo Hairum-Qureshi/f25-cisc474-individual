@@ -3,21 +3,14 @@ import { useState } from 'react';
 import { IoSunny } from 'react-icons/io5';
 import { FaMoon } from 'react-icons/fa';
 import { useQuery } from '@tanstack/react-query';
-import { useApiClient } from '../integrations/api';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useApiClient, useCurrentUser } from '../integrations/api';
+import { Course } from '../interfaces';
 
 export default function Navbar() {
   const [lightMode, setLightMode] = useState(true);
-
-  const CURR_UID = 'cmh3v8sgj0000y0gscplhgko8';
-
-  const { data: currUserData } = useQuery({
-    queryKey: ['currUserData'],
-    queryFn: () => {
-      return fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/users/${CURR_UID}`,
-      ).then((res) => res.json());
-    },
-  });
+  const { data: currUserData } = useCurrentUser();
+  const CURR_UID = currUserData?.id;
 
   const routerState = useRouterState();
   const currentMatch = routerState.matches.at(-1);
@@ -25,19 +18,20 @@ export default function Navbar() {
   const courseID = params?.courseID;
 
   const { request } = useApiClient();
+  const { logout } = useAuth0();
 
   const { data: courseData } = useQuery({
     queryKey: ['course', courseID],
     queryFn: () => request(`/courses/${courseID}`),
     enabled: !!courseID, // prevent running before ID exists
   });
-  
+
   return (
     <nav className="w-full bg-slate-200 p-4 h-20">
       <div className="flex items-center">
         <div className="w-12 h-12 rounded-lg border-2 border-slate-400">
           <img
-            src={currUserData?.profilePicture}
+            src={currUserData?.profilePicture || ''}
             alt="User profile picture"
             className="w-full h-full rounded-md object-cover"
           />
@@ -51,23 +45,31 @@ export default function Navbar() {
           </h3>
         </div>
         <div className="ml-auto flex items-center space-x-5">
+          <p
+            className="font-semibold text-sky-700 hover:cursor-pointer"
+            onClick={() =>
+              logout({ logoutParams: { returnTo: window.location.origin } })
+            }
+          >
+            Logout
+          </p>
           <Link to="/dashboard" className="font-semibold text-sky-700">
             Dashboard
           </Link>
           <Link
             to="/$uid/profile"
-            params={{ uid: CURR_UID }}
+            params={{ uid: CURR_UID! }}
             className="font-semibold text-sky-700"
           >
             Profile
           </Link>
-          {courseData?.courseName && courseID && (
+          {(courseData as Course)?.courseName && courseID && (
             <Link
               to="/course/$courseID"
               params={{ courseID }}
               className="font-semibold text-sky-700"
             >
-              {courseData?.courseName}
+              {(courseData as Course)?.courseName}
             </Link>
           )}
           {courseID && (
