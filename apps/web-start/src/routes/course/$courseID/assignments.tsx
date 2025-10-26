@@ -13,27 +13,22 @@ export const Route = createFileRoute('/course/$courseID/assignments')({
 function RouteComponent() {
   const [collapseAll, setCollapseAll] = useState(false);
   const { courseID } = Route.useParams();
-
   const { request } = useApiClient();
   const { isAuthenticated, isLoading: authLoading } = useAuth0();
 
-  const { data: assignmentsData = [] } = useQuery({
-    queryKey: ['courseGrade', courseID],
-    queryFn: () => request<Assignment>(`/assignments/${courseID}`),
+  const {
+    data: assignmentsData = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['assignments', courseID],
+    queryFn: () => request<Array<Assignment>>(`/assignments/${courseID}`),
     enabled: !!courseID,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCollapseAll(e.target.checked);
   };
-
-  if (authLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-slate-300">
-        <p className="text-lg">Loading...</p>
-      </div>
-    );
-  }
 
   if (!isAuthenticated) {
     return (
@@ -43,7 +38,7 @@ function RouteComponent() {
             You must be logged in to view course assignments.
           </h2>
           <p className="text-sky-700 font-semibold">
-            Click here{' '}
+            Click{' '}
             <Link to="/" className="underline">
               here
             </Link>{' '}
@@ -54,9 +49,28 @@ function RouteComponent() {
     );
   }
 
-  const groupedByModule = (assignmentsData as Assignment[])?.reduce(
-    (acc: { [x: string]: Array<Assignment> }, assignment: Assignment) => {
-      const key = assignment.module;
+  if (authLoading || isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <p className="text-lg">Loading assignments…</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <p className="text-lg text-red-600">
+          Failed to load assignments. Please try again later.
+        </p>
+      </div>
+    );
+  }
+
+  // 🧼 Group assignments safely by module
+  const groupedByModule = assignmentsData.reduce<Record<string, Assignment[]>>(
+    (acc, assignment) => {
+      const key = assignment.module || 'Uncategorized';
       if (!acc[key]) acc[key] = [];
       acc[key].push(assignment);
       return acc;
@@ -80,13 +94,12 @@ function RouteComponent() {
                 />
                 <div
                   className="
-      w-11 h-6 bg-gray-400 rounded-full
-      relative transition
-      after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-      after:w-5 after:h-5 after:bg-white after:rounded-full
-      after:transition-all
-      peer-checked:bg-blue-600 peer-checked:after:translate-x-full
-    "
+                    w-11 h-6 bg-gray-400 rounded-full relative transition
+                    after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                    after:w-5 after:h-5 after:bg-white after:rounded-full
+                    after:transition-all
+                    peer-checked:bg-blue-600 peer-checked:after:translate-x-full
+                  "
                 ></div>
                 <span className="ml-3 mr-5 text-base font-medium">
                   {collapseAll ? 'Close All' : 'Open All'}
@@ -94,18 +107,25 @@ function RouteComponent() {
               </label>
             </div>
           </div>
-          <div className="space-y-5 mx-3 h-screen overflow-y-scroll">
-            {Object.entries(groupedByModule).map(
-              ([moduleName, assignments], index) => (
-                <Module
-                  key={index}
-                  collapseAll={collapseAll}
-                  module={moduleName}
-                  moduleMetaData={assignments as Array<Assignment>}
-                />
-              ),
-            )}
-          </div>
+
+          {assignmentsData.length === 0 ? (
+            <div className="mx-5 text-gray-600 text-center py-10">
+              No assignments have been posted yet.
+            </div>
+          ) : (
+            <div className="space-y-5 mx-3 h-screen overflow-y-scroll">
+              {Object.entries(groupedByModule).map(
+                ([moduleName, assignments], index) => (
+                  <Module
+                    key={index}
+                    collapseAll={collapseAll}
+                    module={moduleName}
+                    moduleMetaData={assignments}
+                  />
+                ),
+              )}
+            </div>
+          )}
         </div>
         <div className="w-1/4 rounded-md bg-slate-200">
           <div className="flex">
@@ -113,7 +133,7 @@ function RouteComponent() {
               <h2 className="text-2xl font-semibold my-5 mx-5">
                 Recent Feedback
               </h2>
-              <div className="space-y-5 mx-3 my-4 h-60 overflow-y-auto">
+              <div className="space-y-5 mx-3 my-4 h-60 overflow-y-auto text-gray-600">
                 You currently have no recent feedback
               </div>
             </div>
