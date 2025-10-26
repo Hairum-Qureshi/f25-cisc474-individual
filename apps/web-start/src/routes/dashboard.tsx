@@ -24,12 +24,8 @@ function RouteComponent() {
   const queryClient = useQueryClient();
   const { isAuthenticated, isLoading: authLoading } = useAuth0();
 
-  // ✅ Fetch current user — only when authenticated
   const { data: currUser } = useCurrentUser();
 
-  console.log(currUser);
-
-  // 📝 State for deadlines and UI
   const [courseTitle, setCourseTitle] = useState('');
   const [courseDescription, setCourseDescription] = useState('');
   const [courseDeadline, setCourseDeadline] = useState('');
@@ -40,7 +36,6 @@ function RouteComponent() {
   const [editDescription, setEditDescription] = useState('');
   const [editDeadline, setEditDeadline] = useState('');
 
-  // 📅 Deadlines query
   const { data: deadlines = [], isLoading: deadlinesLoading } = useQuery<
     Array<DeadlineOut>
   >({
@@ -50,20 +45,18 @@ function RouteComponent() {
       if (!res.ok) throw new Error(await res.text());
       return res.json();
     },
-    enabled: isAuthenticated, // 👈 only fetch when authenticated
+    enabled: isAuthenticated,
   });
 
-  // 📚 User data (separate explicit fetch by ID — can be replaced by currUser later)
   const { data: currUserData, isLoading: userLoading } = useQuery({
     queryKey: ['currUserData'],
     queryFn: () =>
       fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${CURR_UID}`).then(
         (res) => res.json(),
       ),
-    enabled: isAuthenticated, // 👈 only fetch when authenticated
+    enabled: isAuthenticated, 
   });
 
-  // 🧰 Create mutation
   const createMutation = useMutation({
     mutationFn: async (newDeadline: DeadlineCreateIn) => {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/deadlines`, {
@@ -86,7 +79,6 @@ function RouteComponent() {
     },
   });
 
-  // ✏️ Update mutation
   const updateMutation = useMutation({
     mutationFn: async ({
       id,
@@ -119,7 +111,6 @@ function RouteComponent() {
     },
   });
 
-  // 🗑️ Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const res = await fetch(
@@ -139,7 +130,6 @@ function RouteComponent() {
     },
   });
 
-  // 🧭 Edit handler
   const handleEdit = (deadline: DeadlineOut) => {
     setEditId(deadline.id);
     setEditTitle(deadline.courseTitle);
@@ -148,7 +138,6 @@ function RouteComponent() {
     setShowEditForm(true);
   };
 
-  // 🛑 Auth loading state
   if (authLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-slate-300">
@@ -157,7 +146,6 @@ function RouteComponent() {
     );
   }
 
-  // 🚫 Not authenticated
   if (!isAuthenticated) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-slate-300">
@@ -177,7 +165,6 @@ function RouteComponent() {
     );
   }
 
-  // ✅ Main authenticated render
   return (
     <div className="bg-slate-300 min-h-screen h-auto">
       <div className="flex-1 p-3 flex space-x-4">
@@ -208,7 +195,6 @@ function RouteComponent() {
           </div>
         </div>
 
-        {/* Right Panel - Deadlines & Calendar */}
         <div className="w-1/2 rounded-md bg-slate-200">
           <div className="flex">
             <div className="w-1/2 overflow-y-scroll">
@@ -235,7 +221,6 @@ function RouteComponent() {
                 )}
               </div>
 
-              {/* Deadlines List */}
               <div className="space-y-5 mx-3 h-60 overflow-y-auto">
                 {deadlinesLoading ? (
                   <p>Loading deadlines...</p>
@@ -280,7 +265,6 @@ function RouteComponent() {
                   ))
                 )}
 
-                {/* Create Deadline Form */}
                 {showForm && (
                   <div className="bg-white p-3 rounded-md shadow-md">
                     <div className="mb-3">
@@ -335,7 +319,6 @@ function RouteComponent() {
                   </div>
                 )}
 
-                {/* Edit Deadline Form */}
                 {editId && showEditForm && (
                   <div className="bg-white p-3 rounded-md shadow-md border border-blue-500">
                     <h3 className="text-lg font-semibold mb-2">
@@ -411,14 +394,10 @@ function RouteComponent() {
                 )}
               </div>
             </div>
-
-            {/* Calendar */}
             <div className="w-1/2">
               <Calendar />
             </div>
           </div>
-
-          {/* Announcements Section */}
           <div className="w-full">
             <h2 className="text-2xl font-semibold my-5 mx-5">
               Recent Announcements
@@ -436,3 +415,5 @@ function RouteComponent() {
 }
 
 export default RouteComponent;
+
+// Code tweaked by ChatGPT
