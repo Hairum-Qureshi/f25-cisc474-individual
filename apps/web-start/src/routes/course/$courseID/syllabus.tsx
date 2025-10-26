@@ -38,7 +38,7 @@ function RouteComponent() {
     );
   }
 
-  if (authLoading || isLoading) {
+  if (authLoading || isLoading || !courseData) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-slate-300">
         <p className="text-lg">Loading course syllabus</p>
