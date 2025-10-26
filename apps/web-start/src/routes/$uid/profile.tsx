@@ -1,36 +1,54 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
 import { FaEdit, FaRegUserCircle } from 'react-icons/fa';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth0 } from '@auth0/auth0-react';
 import Course from '../../components/Course';
-import type { Course as ICourse } from '../../interfaces';
+import { useApiClient } from '../../integrations/api';
+import type { Course as ICourse, UserData } from '../../interfaces';
 
 export const Route = createFileRoute('/$uid/profile')({
   component: RouteComponent,
-  loader: async (context) => {
-    const userID = (context.params as { uid?: string }).uid ?? '';
-
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/users/${userID}`,
-    );
-
-    if (!response.ok) {
-      console.error(
-        'User data fetch failed',
-        response.status,
-        await response.text(),
-      );
-      throw new Error('Failed to fetch user data');
-    }
-
-    const userData = await response.json();
-    return { userData };
-  },
 });
 
 function RouteComponent() {
-  const { userData } = Route.useLoaderData();
+  const { uid } = Route.useParams();
+  const { request } = useApiClient();
+  const { isAuthenticated, isLoading: authLoading } = useAuth0();
+
+  const { data: userData, isLoading } = useQuery({
+    queryKey: [],
+    queryFn: () => request<UserData>(`/users/${uid}`),
+  });
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-4">
+            You must be logged in to view user profiles.
+          </h2>
+          <p className="text-sky-700 font-semibold">
+            Click{' '}
+            <Link to="/" className="underline">
+              here
+            </Link>{' '}
+            to sign in
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (authLoading || isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-slate-300">
+        <p className="text-lg">Loading course syllabus</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50 flex justify-center py-10">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-blue-50 flex justify-center py-10">
       <div className="w-full max-w-5xl grid grid-cols-3 gap-6">
         <div className="col-span-2 flex flex-col gap-6">
           <div className="bg-white shadow-sm rounded-xl p-6 flex items-center gap-4 border border-gray-100">
@@ -55,7 +73,7 @@ function RouteComponent() {
             </h3>
             <div className="space-y-4">
               <p className="text-slate-500">
-                {userData.bio || 'No bio written'}
+                {userData?.bio || 'No bio written'}
               </p>
             </div>
           </div>
